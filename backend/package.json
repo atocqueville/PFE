@@ -1,0 +1,24 @@
+{
+  "name": "PFE Backend",
+  "version": "1.0.0",
+  "description": "Trading Bot using bitfinex API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atocqueville/PFE.git"
+  },
+  "author": "Tokie",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/atocqueville/PFE/issues"
+  },
+  "homepage": "https://github.com/atocqueville/PFE#readme",
+  "dependencies": {
+    "crypto-js": "^3.1.9-1",
+    "ws": "^3.2.0"
+  }
+}
