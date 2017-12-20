@@ -15,7 +15,7 @@ let sell;
 let couchbase = require('couchbase');
 let cluster = new couchbase.Cluster('127.0.0.1');
 cluster.authenticate('Tokie', 'detoka');
-var bucket = cluster.openBucket('candles', function(err) {
+let bucket = cluster.openBucket('candles', function(err) {
   if (err) {
     console.log('failed');
     throw err;
