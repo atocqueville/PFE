@@ -1,5 +1,10 @@
 const WebSocket = require('ws');
 let fs = require('fs');
+
+let couchbase = require('couchbase');
+let cluster = new couchbase.Cluster('127.0.0.1');
+cluster.authenticate('Tokie', 'detoka');
+
 let loki = require('lokijs');
 const wsCandles = new WebSocket('wss://api.bitfinex.com/ws/2');
 const ApiKeyArray = fs.readFileSync('./APIKEY.txt').toString('utf-8').split('\r\n');
@@ -11,19 +16,6 @@ let lastRSI;
 let long = false;
 let buy;
 let sell;
-
-let couchbase = require('couchbase');
-let cluster = new couchbase.Cluster('127.0.0.1');
-cluster.authenticate('Tokie', 'detoka');
-let bucket = cluster.openBucket('candles', function(err) {
-  if (err) {
-    console.log('failed');
-    throw err;
-  }
-  bucket.get('20-12-2017', function(err, res) {
-    console.log('Value: ', res.value);
-  });
-});
 
 wsCandles.onopen = () => {
   let count = 0;
@@ -67,6 +59,7 @@ wsCandles.onopen = () => {
         if (count === 2) {
           let previousCandles = response[1];
           initJSON(previousCandles, period);
+          initMongoDB(previousCandles, period);
         }
         count++;
       } else {
@@ -94,6 +87,29 @@ function makeDecisions(candleJSON) {
       long = false;
     }
   }
+}
+
+function initMongoDB(previousCandles, period) {
+  let bucket = cluster.openBucket('candles', function(err) {
+    if (err) {
+      console.log('cant open bucket');
+      throw err;
+    }
+
+    bucket.insert(new Date().toLocaleDateString(),
+      {
+        'some': 'value',
+        'another': 'value2'
+      }, function(err, result) {
+      if (!err) {
+        console.log("stored document successfully. CAS is %j", result.cas);
+      } else {
+        console.error("Couldn't store document: %j", err);
+      }
+    });
+
+  });
+
 }
 
 function initJSON(previousCandles, period){
