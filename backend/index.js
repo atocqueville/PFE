@@ -12,6 +12,19 @@ let long = false;
 let buy;
 let sell;
 
+let couchbase = require('couchbase');
+let cluster = new couchbase.Cluster('127.0.0.1');
+cluster.authenticate('Tokie', 'detoka');
+var bucket = cluster.openBucket('candles', function(err) {
+  if (err) {
+    console.log('failed');
+    throw err;
+  }
+  bucket.get('20-12-2017', function(err, res) {
+    console.log('Value: ', res.value);
+  });
+});
+
 wsCandles.onopen = () => {
   let count = 0;
   const crypto = require('crypto-js');
