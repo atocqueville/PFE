@@ -5,13 +5,11 @@ let couchbase = require('couchbase');
 let cluster = new couchbase.Cluster('127.0.0.1');
 cluster.authenticate('Tokie', 'detoka');
 
-let loki = require('lokijs');
 const wsCandles = new WebSocket('wss://api.bitfinex.com/ws/2');
 const ApiKeyArray = fs.readFileSync('./APIKEY.txt').toString('utf-8').split('\r\n');
-let db = new loki('candles.json');
-let candlesJSON = db.addCollection('candles');
+let candlesJSON = [];
 let period = 9;
-let MTS = 30;
+let MTS = 1;
 let lastRSI;
 let long = false;
 let buy;
@@ -58,15 +56,13 @@ wsCandles.onopen = () => {
       if (count < 3) {
         if (count === 2) {
           let previousCandles = response[1];
-          initJSON(previousCandles, period);
-          initMongoDB(previousCandles, period);
+          initCouchBase(previousCandles, period);
         }
         count++;
       } else {
-        updateJSON(response[1]);
+        // updateJSON(response[1]);
       }
     }
-    db.saveDatabase();
   }
 };
 
@@ -89,18 +85,18 @@ function makeDecisions(candleJSON) {
   }
 }
 
-function initMongoDB(previousCandles, period) {
+function initCouchBase(previousCandles, period) {
   let bucket = cluster.openBucket('candles', function(err) {
     if (err) {
       console.log('cant open bucket');
       throw err;
     }
 
-    bucket.insert(new Date().toLocaleDateString(),
-      {
-        'some': 'value',
-        'another': 'value2'
-      }, function(err, result) {
+    initJSON(previousCandles, period);
+
+    bucket.upsert(new Date().toLocaleDateString(),
+      candlesJSON
+      , function(err, result) {
       if (!err) {
         console.log("stored document successfully. CAS is %j", result.cas);
       } else {
@@ -114,35 +110,37 @@ function initMongoDB(previousCandles, period) {
 
 function initJSON(previousCandles, period){
   previousCandles.reverse();
+
   for (let i = 1; i < previousCandles.length; i++) {
-    candlesJSON.insert({
-      MTS: previousCandles[i][0],
-      CLOSE: previousCandles[i][2],
-      DIFF: previousCandles[i][2] - previousCandles[i-1][2],
-      AVGGAIN: '',
-      AVGLOSS: '',
-      RSI: ''
-    });
+    candlesJSON.push(
+      {
+        MTS: previousCandles[i][0],
+        CLOSE: previousCandles[i][2],
+        DIFF: previousCandles[i][2] - previousCandles[i-1][2],
+        AVGGAIN: '',
+        AVGLOSS: '',
+        RSI: ''
+      }
+    );
   }
 
   let avgGain = 0;
   let avgLoss = 0;
   for (let i = 1; i < period + 1; i++) {
-    let candle = candlesJSON.get(i);
+    let candle = candlesJSON[i];
     if (candle.DIFF > 0) {
       avgGain += candle.DIFF;
     } else {
       avgLoss += Math.abs(candle.DIFF);
     }
   }
-  let firstDynamicCandle = candlesJSON.get(period);
+  let firstDynamicCandle = candlesJSON[period];
   firstDynamicCandle.AVGGAIN = avgGain / period;
   firstDynamicCandle.AVGLOSS = avgLoss / period;
-  candlesJSON.update(firstDynamicCandle);
 
-  for (let i = period + 1; i < previousCandles.length; i++) {
-    let previousCandle = candlesJSON.get(i-1);
-    let candle = candlesJSON.get(i);
+  for (let i = period + 1; i < previousCandles.length - 1; i++) {
+    let previousCandle = candlesJSON[i-1];
+    let candle = candlesJSON[i];
     let previousAvgGain = previousCandle.AVGGAIN;
     let previousAvgLoss = previousCandle.AVGLOSS;
     let diff = candle.DIFF;
@@ -158,7 +156,6 @@ function initJSON(previousCandles, period){
       candle.AVGLOSS = (previousAvgLoss * (period - 1)) / period;
     }
     candle.RSI = 100 - (100 / (1 + (candle.AVGGAIN / candle.AVGLOSS)));
-    candlesJSON.update(candle);
   }
 }
 
