@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-let apiKeys = require('./APIKEYS.json');
+let apiKeys = require('./apikeys.json');
 
 let couchbase = require('couchbase');
 let cluster = new couchbase.Cluster('127.0.0.1');
