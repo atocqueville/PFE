@@ -31,7 +31,7 @@
 /libpeerconnection.log
 npm-debug.log
 testem.log
-/backend/APIKEY.txt
+/backend/APIKEYS.json
 /typings
 
 # e2e

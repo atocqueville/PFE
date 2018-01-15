@@ -1,12 +1,11 @@
 const WebSocket = require('ws');
-let fs = require('fs');
+let apiKeys = require('./APIKEYS.json');
 
 let couchbase = require('couchbase');
 let cluster = new couchbase.Cluster('127.0.0.1');
 cluster.authenticate('Tokie', 'detoka');
 
 const wsCandles = new WebSocket('wss://api.bitfinex.com/ws/2');
-const ApiKeyArray = fs.readFileSync('./APIKEY.txt').toString('utf-8').split('\r\n');
 let candlesJSON = [];
 let period = 9;
 let MTS = 1;
@@ -18,17 +17,17 @@ let sell;
 wsCandles.onopen = () => {
   let count = 0;
   const crypto = require('crypto-js');
-  const apiKey = ApiKeyArray[0];
-  const apiSecret = ApiKeyArray[1];
+  const keyPublic = apiKeys.public;
+  const keySecret = apiKeys.private;
 
   const authNonce = Date.now() * 1000;
   const authPayload = 'AUTH' + authNonce;
   const authSig = crypto
-    .HmacSHA384(authPayload, apiSecret)
+    .HmacSHA384(authPayload, keySecret)
     .toString(crypto.enc.Hex);
 
   const payload = {
-    apiKey,
+    keyPublic,
     authSig,
     authNonce,
     authPayload,
