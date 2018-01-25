@@ -16,7 +16,6 @@ cluster.authenticate('Tokie', 'detoka');
 
 let candlesJSON = [];
 
-let lastRSI;
 let long = false;
 let buy;
 let sell;
@@ -55,7 +54,6 @@ wsCandles.onopen = () => {
   wsCandles.onmessage = (msg) => {
     let response = JSON.parse(msg.data);
     if (response[1] === 'hb') {
-      // console.log('heartbeat');
     } else {
       if (count < 3) {
         if (count === 2) {
@@ -102,7 +100,7 @@ function initCouchbase(previousCandles, period) {
       candlesJSON
       , function(err, result) {
         if (!err) {
-          console.log("stored document successfully. CAS is %j", result.cas);
+         // console.log("stored document successfully. CAS is %j", result.cas);
         } else {
           console.error("Couldn't store document: %j", err);
         }
@@ -188,73 +186,61 @@ function updateJSON(response, documentCB) {
 
   if (search.length !== 0) {
      if (search[0].DATA.CLOSE !== response[2]) {
-       console.log("updating candle..");
        updateCouchbase(documentCB, response);
-      // updateCandle(search[0].DATA, response, documentCB);
       // makeDecisions(candleJSON);
      }
   } else {
-    console.log('existe pas !');
     createCandle(response, documentCB);
   }
 }
 
 function updateCouchbase(documentCB, candleBitfinex) {
-    let bucket = cluster.openBucket('candles', function(err) {
-        if (err) {
-            console.log('cant open bucket');
-            throw err;
-        }
+  let bucket = cluster.openBucket('candles', function(err) {
+      if (err) {
+          console.log('cant open bucket');
+          throw err;
+      }
 
-        let newJSON = updateCandle(documentCB, candleBitfinex);
+      let newJSON = updateCandle(documentCB, candleBitfinex);
 
-        bucket.upsert('values',
-            newJSON
-            , function(err, result) {
-                if (!err) {
-                    console.log("stored document successfully. CAS is %j", result.cas);
-                } else {
-                    console.error("Couldn't store document: %j", err);
-                }
-            });
-    });
+      bucket.upsert('values',
+          newJSON
+          , function(err, result) {
+              if (!err) {
+              //    console.log("stored document successfully. CAS is %j", result.cas);
+              } else {
+                  console.error("Couldn't store document: %j", err);
+              }
+          });
+  });
 }
 
-function updateCandle(candleJSON, candleBitfinex, documentCB) {
+function updateCandle(documentCB, candleBitfinex) {
 
-    console.log(Number(candleBitfinex[0]) - 60000 * Number(MTS));
-    console.log(candleBitfinex[0]);
+  let previousCandle = getObjects(documentCB, 'MTS', Number(candleBitfinex[0]) - 60000 * Number(MTS))[0].DATA;
+  let actualCandle = getObjects(documentCB, 'MTS', candleBitfinex[0])[0].DATA;
 
-    let previousCandle = getObjects(documentCB, 'MTS', Number(candleBitfinex[0]) - 60000 * Number(MTS));
-    let actualCandle = getObjects(documentCB, 'MTS', "1516890000000");
 
-    console.log(previousCandle);
-    console.log(actualCandle);
+  for (let i = 0; i < documentCB.length; i++) {
+    if (documentCB[i].MTS === candleBitfinex[0]) {
+      documentCB[i].DATA.CLOSE = candleBitfinex[2];
+      documentCB[i].DATA.DIFF = Number(actualCandle.CLOSE) - Number(previousCandle.CLOSE);
 
-  candleJSON[0].CLOSE = candleBitfinex[2];
-  candleJSON[0].DIFF = candleJSON[0].CLOSE - previousCandle[0].CLOSE;
-
-  if (candleJSON[0].DIFF > 0) {
-    candleJSON[0].AVGGAIN = (previousCandle[0].AVGGAIN * (period - 1) + candleJSON[0].DIFF) / period;
-    candleJSON[0].AVGLOSS = (previousCandle[0].AVGLOSS * (period - 1)) / period;
-  } else if (candleJSON[0].DIFF < 0) {
-    candleJSON[0].AVGGAIN = (previousCandle[0].AVGGAIN * (period - 1)) / period;
-    candleJSON[0].AVGLOSS = (previousCandle[0].AVGLOSS * (period - 1) + Math.abs(candleJSON[0].DIFF)) / period;
-  } else {
-    candleJSON[0].AVGGAIN = (previousCandle[0].AVGGAIN * (period - 1)) / period;
-    candleJSON[0].AVGLOSS = (previousCandle[0].AVGLOSS * (period - 1)) / period;
-  }
-  candleJSON[0].RSI = 100 - (100 / (1 + (candleJSON[0].AVGGAIN / candleJSON[0].AVGLOSS)));
-  candlesJSON.update(candleJSON);
-
-    for (let i = 0; i < candlesJSON2.length; i++) {
-        if (candlesJSON2[i].MTS === 1516831200000) {
-            console.log(candlesJSON2[i]);
-            candlesJSON2[i].DATA.CLOSE = 200;
-            console.log(candlesJSON2[i]);
-            break;
-        }
+      if (documentCB[i].DATA.DIFF > 0) {
+        documentCB[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1) + documentCB[i].DATA.DIFF) / period;
+        documentCB[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1)) / period;
+      } else if (documentCB[i].DATA.DIFF < 0) {
+        documentCB[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1)) / period;
+        documentCB[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1) + Math.abs(documentCB[i].DATA.DIFF)) / period;
+      } else {
+        documentCB[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1)) / period;
+        documentCB[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1)) / period;
+      }
+      documentCB[i].DATA.RSI = 100 - (100 / (1 + (documentCB[i].DATA.AVGGAIN / documentCB[i].DATA.AVGLOSS)));
+      break;
     }
+  }
+  return documentCB;
 }
 
 function createCandle(candleBitfinex, documentCB) {
