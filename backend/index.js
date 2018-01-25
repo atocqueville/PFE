@@ -222,18 +222,15 @@ function updateCouchbase(documentCB, candleBitfinex) {
 
 function updateCandle(candleJSON, candleBitfinex, documentCB) {
 
-    for (let i = 0; i < candlesJSON2.length; i++) {
-        if (candlesJSON2[i].MTS === 1516831200000) {
-            console.log(candlesJSON2[i]);
-            candlesJSON2[i].DATA.CLOSE = 200;
-            console.log(candlesJSON2[i]);
-            break;
-        }
-    }
+    console.log(Number(candleBitfinex[0]) - 60000 * Number(MTS));
+    console.log(candleBitfinex[0]);
 
-  let previousCandle = candlesJSON.find({
-    'MTS': candleJSON[0].MTS - (60000 * Number(MTS))
-  });
+    let previousCandle = getObjects(documentCB, 'MTS', Number(candleBitfinex[0]) - 60000 * Number(MTS));
+    let actualCandle = getObjects(documentCB, 'MTS', "1516890000000");
+
+    console.log(previousCandle);
+    console.log(actualCandle);
+
   candleJSON[0].CLOSE = candleBitfinex[2];
   candleJSON[0].DIFF = candleJSON[0].CLOSE - previousCandle[0].CLOSE;
 
@@ -249,6 +246,15 @@ function updateCandle(candleJSON, candleBitfinex, documentCB) {
   }
   candleJSON[0].RSI = 100 - (100 / (1 + (candleJSON[0].AVGGAIN / candleJSON[0].AVGLOSS)));
   candlesJSON.update(candleJSON);
+
+    for (let i = 0; i < candlesJSON2.length; i++) {
+        if (candlesJSON2[i].MTS === 1516831200000) {
+            console.log(candlesJSON2[i]);
+            candlesJSON2[i].DATA.CLOSE = 200;
+            console.log(candlesJSON2[i]);
+            break;
+        }
+    }
 }
 
 function createCandle(candleBitfinex, documentCB) {
