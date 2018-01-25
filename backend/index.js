@@ -98,7 +98,7 @@ function initCouchbase(previousCandles, period) {
 
     initJSON(previousCandles, period);
 
-    bucket.upsert(new Date().toLocaleDateString(),
+    bucket.upsert('values',
       candlesJSON
       , function(err, result) {
         if (!err) {
@@ -131,7 +131,7 @@ function initJSON(previousCandles, period) {
 
   let avgGain = 0;
   let avgLoss = 0;
-  for (let i = 1; i < period + 1; i++) {
+  for (let i = 1; i < Number(period) + 1; i++) {
     let candle = candlesJSON[i].DATA;
     if (candle.DIFF > 0) {
       avgGain += candle.DIFF;
@@ -139,11 +139,11 @@ function initJSON(previousCandles, period) {
       avgLoss += Math.abs(candle.DIFF);
     }
   }
-  let firstDynamicCandle = candlesJSON[period];
-  firstDynamicCandle.AVGGAIN = avgGain / period;
-  firstDynamicCandle.AVGLOSS = avgLoss / period;
+  let firstDynamicCandle = candlesJSON[period].DATA;
+  firstDynamicCandle.AVGGAIN = avgGain / Number(period);
+  firstDynamicCandle.AVGLOSS = avgLoss / Number(period);
 
-  for (let i = period + 1; i < previousCandles.length - 1; i++) {
+  for (let i = Number(period) + 1; i < previousCandles.length - 1; i++) {
     let previousCandle = candlesJSON[i - 1].DATA;
     let candle = candlesJSON[i].DATA;
     let previousAvgGain = previousCandle.AVGGAIN;
@@ -151,14 +151,14 @@ function initJSON(previousCandles, period) {
     let diff = candle.DIFF;
 
     if (diff > 0) {
-      candle.AVGGAIN = (previousAvgGain * (period - 1) + diff) / period;
-      candle.AVGLOSS = (previousAvgLoss * (period - 1)) / period;
+      candle.AVGGAIN = (previousAvgGain * (Number(period) - 1) + diff) / Number(period);
+      candle.AVGLOSS = (previousAvgLoss * (Number(period) - 1)) / Number(period);
     } else if (diff < 0) {
-      candle.AVGGAIN = (previousAvgGain * (period - 1)) / period;
-      candle.AVGLOSS = (previousAvgLoss * (period - 1) + Math.abs(diff)) / period;
+        candle.AVGGAIN = (previousAvgGain * (Number(period) - 1)) / Number(period);
+      candle.AVGLOSS = (previousAvgLoss * (Number(period) - 1) + Math.abs(diff)) / Number(period);
     } else {
-      candle.AVGGAIN = (previousAvgGain * (period - 1)) / period;
-      candle.AVGLOSS = (previousAvgLoss * (period - 1)) / period;
+        candle.AVGGAIN = (previousAvgGain * (Number(period) - 1)) / Number(period);
+      candle.AVGLOSS = (previousAvgLoss * (Number(period) - 1)) / Number(period);
     }
     candle.RSI = 100 - (100 / (1 + (candle.AVGGAIN / candle.AVGLOSS)));
   }
@@ -171,7 +171,7 @@ function retrieveDocument(response) {
       throw err;
     }
 
-    bucket.get('2018-1-17', function (err, result) {
+    bucket.get('values', function (err, result) {
       if (err) {
         console.log('Some error occurred: %j', err);
       } else {
@@ -187,18 +187,49 @@ function updateJSON(response, documentCB) {
   let search = getObjects(documentCB, 'MTS', response[0]);
 
   if (search.length !== 0) {
-    console.log('existe !');
-    // if (candleJSON[0].CLOSE !== response[2]) {
-    //   updateCandle(candleJSON, response);
-    //   makeDecisions(candleJSON);
-    // }
+     if (search[0].DATA.CLOSE !== response[2]) {
+       console.log("updating candle..");
+       updateCouchbase(documentCB, response);
+      // updateCandle(search[0].DATA, response, documentCB);
+      // makeDecisions(candleJSON);
+     }
   } else {
     console.log('existe pas !');
     createCandle(response, documentCB);
   }
 }
 
-function updateCandle(candleJSON, candleBitfinex) {
+function updateCouchbase(documentCB, candleBitfinex) {
+    let bucket = cluster.openBucket('candles', function(err) {
+        if (err) {
+            console.log('cant open bucket');
+            throw err;
+        }
+
+        let newJSON = updateCandle(documentCB, candleBitfinex);
+
+        bucket.upsert('values',
+            newJSON
+            , function(err, result) {
+                if (!err) {
+                    console.log("stored document successfully. CAS is %j", result.cas);
+                } else {
+                    console.error("Couldn't store document: %j", err);
+                }
+            });
+    });
+}
+
+function updateCandle(candleJSON, candleBitfinex, documentCB) {
+
+    for (let i = 0; i < candlesJSON2.length; i++) {
+        if (candlesJSON2[i].MTS === 1516831200000) {
+            console.log(candlesJSON2[i]);
+            candlesJSON2[i].DATA.CLOSE = 200;
+            console.log(candlesJSON2[i]);
+            break;
+        }
+    }
 
   let previousCandle = candlesJSON.find({
     'MTS': candleJSON[0].MTS - (60000 * Number(MTS))
@@ -218,7 +249,6 @@ function updateCandle(candleJSON, candleBitfinex) {
   }
   candleJSON[0].RSI = 100 - (100 / (1 + (candleJSON[0].AVGGAIN / candleJSON[0].AVGLOSS)));
   candlesJSON.update(candleJSON);
-  lastRSI = candleJSON[0].RSI;
 }
 
 function createCandle(candleBitfinex, documentCB) {
@@ -245,7 +275,7 @@ function createCandle(candleBitfinex, documentCB) {
       throw err;
     }
 
-    bucket.upsert('2018-1-17', documentCB, function (err, result) {
+    bucket.upsert('values', documentCB, function (err, result) {
       if (!err) {
         console.log("stored document successfully. CAS is %j", result.cas);
       } else {
@@ -260,7 +290,7 @@ function getObjects(obj, key, val) {
   for (let i in obj) {
     if (!obj.hasOwnProperty(i)) continue;
     if (typeof obj[i] == 'object') {
-      objects = objects.concat(getObjects(obj[i], key, val));
+        objects = objects.concat(getObjects(obj[i], key, val));
     } else
     //if key matches and value matches or if key matches and value is not passed (eliminating the case where key matches but passed value does not)
     if (i == key && obj[i] == val || i == key && val == '') { //
@@ -272,5 +302,5 @@ function getObjects(obj, key, val) {
       }
     }
   }
-  return objects;
+    return objects;
 }
