@@ -20,6 +20,7 @@
   "dependencies": {
     "couchbase": "^2.4.3",
     "crypto-js": "^3.1.9-1",
+    "log4js": "^2.5.2",
     "lokijs": "^1.5.1",
     "node-cron": "^1.2.1",
     "ws": "^3.2.0"
