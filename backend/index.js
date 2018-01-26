@@ -16,6 +16,11 @@ cluster.authenticate('Tokie', 'detoka');
 
 let candlesJSON = [];
 
+let cron = require('node-cron');
+cron.schedule('*/1 * * * *', function () {
+  console.log('running a task every 3 seconds');
+});
+
 let long = false;
 let buy;
 let sell;
@@ -269,7 +274,7 @@ function createCandle(candleBitfinex, documentCB) {
 
     bucket.upsert('values', documentCB, function (err, result) {
       if (!err) {
-        console.log("stored document successfully. CAS is %j", result.cas);
+        // console.log("stored document successfully. CAS is %j", result.cas);
       } else {
         console.error("Couldn't store document: %j", err);
       }
@@ -281,15 +286,15 @@ function getObjects(obj, key, val) {
   let objects = [];
   for (let i in obj) {
     if (!obj.hasOwnProperty(i)) continue;
-    if (typeof obj[i] == 'object') {
+    if (typeof obj[i] === 'object') {
         objects = objects.concat(getObjects(obj[i], key, val));
     } else
     //if key matches and value matches or if key matches and value is not passed (eliminating the case where key matches but passed value does not)
-    if (i == key && obj[i] == val || i == key && val == '') { //
+    if (i === key && obj[i] === val || i === key && val === '') { //
       objects.push(obj);
-    } else if (obj[i] == val && key == '') {
+    } else if (obj[i] === val && key === '') {
       //only add if the object is not already in the array
-      if (objects.lastIndexOf(obj) == -1) {
+      if (objects.lastIndexOf(obj) === -1) {
         objects.push(obj);
       }
     }
