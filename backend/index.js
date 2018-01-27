@@ -80,7 +80,7 @@ wsCandles.onopen = () => {
         }
         count++;
       } else {
-        retrieveDocument(response[1]);
+        retrieveDocumentAndUpdate(response[1]);
       }
     }
   }
@@ -178,7 +178,7 @@ function initJSON(previousCandles, period) {
   }
 }
 
-function retrieveDocument(response) {
+function retrieveDocumentAndUpdate(response) {
   let bucket = cluster.openBucket('candles', function (err) {
     if (err) {
       console.log('cant open bucket');
@@ -190,7 +190,7 @@ function retrieveDocument(response) {
         console.log('Some error occurred: %j', err);
       } else {
         let documentCB = result.value;
-        updateJSON(response, documentCB);
+        updateJSON(documentCB, response);
       }
     })
   });
@@ -214,29 +214,37 @@ function getDocument() {
   });
 }
 
-function updateJSON(response, documentCB) {
+function updateJSON(documentCB, candleBitfinex) {
 
-  let search = getObjects(documentCB, 'MTS', response[0]);
+  let search = getObjects(documentCB, 'MTS', candleBitfinex[0]);
 
-  if (search.length !== 0) {
-     if (search[0].DATA.CLOSE !== response[2]) {
-       updateCouchbase(documentCB, response);
-      // makeDecisions(candleJSON);
-     }
-  } else {
-    createCandle(response, documentCB);
+  if (search.length === 0) {
+    documentCB.push(
+      {
+        MTS: candleBitfinex[0],
+        DATA:
+          {
+            CLOSE: candleBitfinex[2],
+            DIFF: '',
+            AVGGAIN: '',
+            AVGLOSS: '',
+            RSI: ''
+          }
+      }
+    );
   }
+  updateCouchbase(documentCB, candleBitfinex);
 }
 
 function updateCouchbase(documentCB, candleBitfinex) {
+
+  let newJSON = updateCandle(documentCB, candleBitfinex);
+
   let bucket = cluster.openBucket('candles', function(err) {
       if (err) {
           console.log('cant open bucket');
           throw err;
       }
-
-      let newJSON = updateCandle(documentCB, candleBitfinex);
-
       bucket.upsert('values',
           newJSON
           , function(err) {
@@ -252,13 +260,11 @@ function updateCouchbase(documentCB, candleBitfinex) {
 function updateCandle(documentCB, candleBitfinex) {
 
   let previousCandle = getObjects(documentCB, 'MTS', Number(candleBitfinex[0]) - 60000 * Number(MTS))[0].DATA;
-  let actualCandle = getObjects(documentCB, 'MTS', candleBitfinex[0])[0].DATA;
-
 
   for (let i = 0; i < documentCB.length; i++) {
     if (documentCB[i].MTS === candleBitfinex[0]) {
       documentCB[i].DATA.CLOSE = candleBitfinex[2];
-      documentCB[i].DATA.DIFF = Number(actualCandle.CLOSE) - Number(previousCandle.CLOSE);
+      documentCB[i].DATA.DIFF = Number(candleBitfinex[2]) - Number(previousCandle.CLOSE);
 
       if (documentCB[i].DATA.DIFF > 0) {
         documentCB[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1) + documentCB[i].DATA.DIFF) / period;
@@ -275,40 +281,6 @@ function updateCandle(documentCB, candleBitfinex) {
     }
   }
   return documentCB;
-}
-
-function createCandle(candleBitfinex, documentCB) {
-
-  let previousCandle = getObjects(documentCB, 'MTS', candleBitfinex[0] - (60000 * Number(MTS)))[0].DATA;
-
-  documentCB.push(
-    {
-      MTS: candleBitfinex[0],
-      DATA:
-        {
-          CLOSE: candleBitfinex[2],
-          DIFF: candleBitfinex[2] - previousCandle.CLOSE,
-          AVGGAIN: '',
-          AVGLOSS: '',
-          RSI: ''
-        }
-    }
-  );
-
-  let bucket = cluster.openBucket('candles', function (err) {
-    if (err) {
-      console.log('cant open bucket');
-      throw err;
-    }
-
-    bucket.upsert('values', documentCB, function (err) {
-      if (!err) {
-        // console.log("stored document successfully. CAS is %j", result.cas);
-      } else {
-        console.error("Couldn't store document: %j", err);
-      }
-    });
-  });
 }
 
 function getObjects(obj, key, val) {
