@@ -92,17 +92,13 @@ function makeDecisions(lastCandle) {
       buy = lastCandle.CLOSE;
       logger.info('j\'achete au prix de : $', buy);
       long = true;
-    } else {
-      logger.trace('RSI trop élevé : ', lastCandle.RSI);
     }
   } else if (long) {
     if (lastCandle.RSI >= 70) {
       sell = lastCandle.CLOSE;
       logger.info('je vends au prix de : $', sell);
-      logger.warn('benef : $', Number(sell) - Number(buy));
+      logger.trace('benef : $', Number(sell) - Number(buy));
       long = false;
-    } else {
-      logger.trace('RSI trop bas : ', lastCandle.RSI);
     }
   }
 }
@@ -118,7 +114,7 @@ function initCouchbase(previousCandles, period) {
 
     bucket.upsert('values',
       candlesJSON
-      , function(err, result) {
+      , function(err) {
         if (!err) {
          // console.log("stored document successfully. CAS is %j", result.cas);
         } else {
@@ -243,7 +239,7 @@ function updateCouchbase(documentCB, candleBitfinex) {
 
       bucket.upsert('values',
           newJSON
-          , function(err, result) {
+          , function(err) {
               if (!err) {
               //    console.log("stored document successfully. CAS is %j", result.cas);
               } else {
@@ -283,7 +279,6 @@ function updateCandle(documentCB, candleBitfinex) {
 
 function createCandle(candleBitfinex, documentCB) {
 
-  console.log('creating candle..');
   let previousCandle = getObjects(documentCB, 'MTS', candleBitfinex[0] - (60000 * Number(MTS)))[0].DATA;
 
   documentCB.push(
@@ -306,7 +301,7 @@ function createCandle(candleBitfinex, documentCB) {
       throw err;
     }
 
-    bucket.upsert('values', documentCB, function (err, result) {
+    bucket.upsert('values', documentCB, function (err) {
       if (!err) {
         // console.log("stored document successfully. CAS is %j", result.cas);
       } else {
