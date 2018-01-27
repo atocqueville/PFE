@@ -75,7 +75,7 @@ wsCandles.onopen = () => {
     } else {
       if (count < 3) {
         if (count === 2) {
-          console.log('RSI Bot is on..')
+          console.log('RSI Bot is on..');
           let previousCandles = response[1];
           initCouchbase(previousCandles, period);
         }
@@ -92,14 +92,14 @@ function makeDecisions(lastCandle) {
     if (lastCandle.RSI <= 30) {
       console.log('order executed');
       buy = lastCandle.CLOSE;
-      logger.info('j\'achete au prix de : $', buy);
+      logger.info('achat au prix de : $', buy);
       long = true;
     }
   } else if (long) {
     if (lastCandle.RSI >= 70) {
       console.log('order executed');
       sell = lastCandle.CLOSE;
-      logger.info('je vends au prix de : $', sell);
+      logger.info('vente au prix de : $', sell);
       logger.trace('benef : $', Number(sell) - Number(buy));
       long = false;
     }
