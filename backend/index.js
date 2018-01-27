@@ -1,9 +1,9 @@
 const WebSocket = require('ws');
 const wsCandles = new WebSocket('wss://api.bitfinex.com/ws/2');
 
-let apiKeys = require('./apikeys.json');
-const keyPublic = apiKeys.public;
-const keySecret = apiKeys.private;
+// let apiKeys = require('./apikeys.json');
+// const keyPublic = apiKeys.public;
+// const keySecret = apiKeys.private;
 
 let config = require('./config.json');
 const period = config.period;
