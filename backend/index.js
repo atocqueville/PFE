@@ -17,9 +17,22 @@ cluster.authenticate('Tokie', 'detoka');
 let candlesJSON = [];
 
 let cron = require('node-cron');
-cron.schedule('*/1 * * * *', function () {
-  console.log('running a task every 3 seconds');
+cron.schedule('*/5 * * * * *', function () {
+  getDocument();
 });
+
+let log4js = require('log4js');
+log4js.configure({
+  appenders: {
+    tradesLogs: { type: 'file', filename: 'logger.log' },
+    console: { type: 'console' }
+  },
+  categories: {
+    trades: { appenders: ['tradesLogs'], level: 'trace' },
+    default: { appenders: ['console'], level: 'trace' }
+  }
+});
+const logger = log4js.getLogger('trades');
 
 let long = false;
 let buy;
@@ -73,21 +86,23 @@ wsCandles.onopen = () => {
   }
 };
 
-function makeDecisions(candleJSON) {
+function makeDecisions(lastCandle) {
   if (!long) {
-    if (lastRSI <= 30) {
-      buy = candleJSON[0].CLOSE;
-      console.log('j\'achete au prix de : $', buy);
-      console.log((new Date()));
+    if (lastCandle.RSI <= 30) {
+      buy = lastCandle.CLOSE;
+      logger.info('j\'achete au prix de : $', buy);
       long = true;
+    } else {
+      logger.trace('RSI trop élevé : ', lastCandle.RSI);
     }
   } else if (long) {
-    if (lastRSI >= 70) {
-      sell = candleJSON[0].CLOSE;
-      console.log('je vends au prix de : $', sell);
-      console.log('benef : $', Number(sell) - Number(buy));
-      console.log((new Date()));
+    if (lastCandle.RSI >= 70) {
+      sell = lastCandle.CLOSE;
+      logger.info('je vends au prix de : $', sell);
+      logger.warn('benef : $', Number(sell) - Number(buy));
       long = false;
+    } else {
+      logger.trace('RSI trop bas : ', lastCandle.RSI);
     }
   }
 }
@@ -185,6 +200,24 @@ function retrieveDocument(response) {
   });
 }
 
+function getDocument() {
+  let bucket = cluster.openBucket('candles', function (err) {
+    if (err) {
+      console.log('cant open bucket');
+      throw err;
+    }
+
+    bucket.get('values', function (err, result) {
+      if (err) {
+        console.log('Some error occurred: %j', err);
+      } else {
+        let lastCandle = result.value.reverse()[0].DATA;
+        makeDecisions(lastCandle);
+      }
+    })
+  });
+}
+
 function updateJSON(response, documentCB) {
 
   let search = getObjects(documentCB, 'MTS', response[0]);
@@ -250,6 +283,7 @@ function updateCandle(documentCB, candleBitfinex) {
 
 function createCandle(candleBitfinex, documentCB) {
 
+  console.log('creating candle..');
   let previousCandle = getObjects(documentCB, 'MTS', candleBitfinex[0] - (60000 * Number(MTS)))[0].DATA;
 
   documentCB.push(
