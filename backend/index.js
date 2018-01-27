@@ -124,8 +124,8 @@ function initCouchbase(previousCandles, period) {
           console.error("Couldn't store document: %j", err);
         }
       });
+    bucket.disconnect();
   });
-  bucket.disconnect();
 }
 
 function initJSON(previousCandles, period) {
@@ -196,9 +196,9 @@ function retrieveDocumentAndUpdate(response) {
         let documentCB = result.value;
         updateJSON(documentCB, response);
       }
-    })
+    });
+    bucket.disconnect();
   });
-  bucket.disconnect();
 }
 
 function getDocument() {
@@ -215,9 +215,9 @@ function getDocument() {
         let lastCandle = result.value.reverse()[0].DATA;
         makeDecisions(lastCandle);
       }
-    })
+    });
+    bucket.disconnect();
   });
-  bucket.disconnect();
 }
 
 function updateJSON(documentCB, candleBitfinex) {
