@@ -44,17 +44,17 @@ wsCandles.onopen = () => {
 
   const authNonce = Date.now() * 1000;
   const authPayload = 'AUTH' + authNonce;
-  const authSig = crypto
-    .HmacSHA384(authPayload, keySecret)
-    .toString(crypto.enc.Hex);
+  // const authSig = crypto
+  //   .HmacSHA384(authPayload, keySecret)
+  //   .toString(crypto.enc.Hex);
 
-  const payload = {
-    keyPublic,
-    authSig,
-    authNonce,
-    authPayload,
-    event: 'auth'
-  };
+  // const payload = {
+  //   keyPublic,
+  //   authSig,
+  //   authNonce,
+  //   authPayload,
+  //   event: 'auth'
+  // };
 
 //  wsCandles.send(JSON.stringify(payload));
 
