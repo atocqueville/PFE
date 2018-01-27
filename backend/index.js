@@ -125,6 +125,7 @@ function initCouchbase(previousCandles, period) {
         }
       });
   });
+  bucket.disconnect();
 }
 
 function initJSON(previousCandles, period) {
@@ -197,6 +198,7 @@ function retrieveDocumentAndUpdate(response) {
       }
     })
   });
+  bucket.disconnect();
 }
 
 function getDocument() {
@@ -215,6 +217,7 @@ function getDocument() {
       }
     })
   });
+  bucket.disconnect();
 }
 
 function updateJSON(documentCB, candleBitfinex) {
