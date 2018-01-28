@@ -1,13 +1,11 @@
-const WebSocket = require('ws');
-const wsCandles = new WebSocket('wss://api.bitfinex.com/ws/2');
-
 let apiKeys = require('./apikeys.json');
+
+let config = require('./config.json');
 
 const BFX = require('bitfinex-api-node');
 const bfx = new BFX({
   apiKey: apiKeys.public,
   apiSecret: apiKeys.private,
-
   ws: {
     autoReconnect: true,
     seqAudit: true,
@@ -15,40 +13,12 @@ const bfx = new BFX({
   }
 });
 const ws = bfx.ws(2, {
-  manageCandles: true,  // enable candle dataset persistence/management
-  transform: true       // converts ws data arrays to Candle models (and others)
+  manageCandles: true,
+  transform: true
 });
-const CANDLE_KEY = 'trade:1m:tBTCUSD';
+const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
-ws.on('open', () => {
-  ws.subscribeCandles(CANDLE_KEY);
-});
-
-let prevTS = null;
-
-// 'candles' here is an array
-ws.onCandle({key: CANDLE_KEY}, (candles) => {
-  console.log(candles[0]);
-  if (prevTS === null || candles[0].mts > prevTS) {
-    const c = candles[1]; // report previous candle
-
-    console.log(`%s %s open: %f, high: %f, low: %f, close: %f, volume: %f`,
-      CANDLE_KEY, new Date(c.mts).toLocaleTimeString(),
-      c.open, c.high, c.low, c.close, c.volume
-    );
-
-    prevTS = candles[0].mts
-  }
-});
-
-ws.open();
-
-
-
-let config = require('./config.json');
-const period = config.period;
-const MTS = config.timestamp;
-const currency = config.currency;
+// new Date(c.mts).toLocaleTimeString()
 
 let couchbase = require('couchbase');
 let cluster = new couchbase.Cluster('127.0.0.1');
@@ -59,8 +29,6 @@ let bucket = cluster.openBucket('candles', function (err) {
     throw err;
   }
 });
-
-let candlesJSON = [];
 
 let cron = require('node-cron');
 cron.schedule('*/5 * * * * *', function () {
@@ -85,67 +53,33 @@ const logger = log4js.getLogger('trades');
 const responselogger = log4js.getLogger('response');
 const consoleJS = log4js.getLogger('csl');
 
+let init = true;
 let long = false;
 let buy;
 let sell;
 
-wsCandles.onopen = () => {
-  let count = 0;
-  const crypto = require('crypto-js');
+ws.on('open', () => {
+  ws.subscribeCandles(CANDLE_KEY);
+});
 
-  const authNonce = Date.now() * 1000;
-  const authPayload = 'AUTH' + authNonce;
-  // const authSig = crypto
-  //   .HmacSHA384(authPayload, keySecret)
-  //   .toString(crypto.enc.Hex);
-
-  // const payload = {
-  //   keyPublic,
-  //   authSig,
-  //   authNonce,
-  //   authPayload,
-  //   event: 'auth'
-  // };
-
-//  wsCandles.send(JSON.stringify(payload));
-
-  let msg = ({
-    'event': 'subscribe',
-    'channel': 'candles',
-    'key': 'trade:' + MTS + 'm:t' + currency + 'USD'
-  });
-
-  // te = trade executed
-  // tu = trade execution update
-
-  // wsCandles.send(JSON.stringify(msg));
-
-  wsCandles.onmessage = (msg) => {
-    let response = JSON.parse(msg.data);
-    responselogger.trace(response);
-    if (response[1] === 'hb') {
-    } else {
-      if (count < 3) {
-        if (count === 2) {
-          console.log('\n' +
-            '            ____        __     ____ _____ ____       \n' +
-            '           / __ )____  / /_   / __ / ___//  _/       \n' +
-            ' ______   / __  / __ \\/ __/  / /_/ \\__ \\ / /   ______\n' +
-            '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
-            '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
-            '                                                     \n' +
-            '\n');
-          let previousCandles = response[1];
-          consoleJS.trace('Initialising Couchbase..');
-          initCouchbase(previousCandles, period);
-        }
-        count++;
-      } else {
-        retrieveDocumentAndUpdate(response[1]);
-      }
-    }
+ws.onCandle({key: CANDLE_KEY}, (candles) => {
+  responselogger.trace(candles[0]);
+  if (init) {
+    console.log('\n' +
+      '            ____        __     ____ _____ ____       \n' +
+      '           / __ )____  / /_   / __ / ___//  _/       \n' +
+      ' ______   / __  / __ \\/ __/  / /_/ \\__ \\ / /   ______\n' +
+      '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
+      '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
+      '                                                     \n' +
+      '\n');
+    consoleJS.trace('Initialising Couchbase..');
+    initCouchbase(candles);
+    init = false;
   }
-};
+  retrieveDocumentAndUpdate(candles[0]);
+});
+ws.open();
 
 function makeDecisions(lastCandle) {
   if (!long) {
@@ -157,7 +91,7 @@ function makeDecisions(lastCandle) {
     }
   } else if (long) {
     if (lastCandle.RSI >= 70) {
-      consoleJS.warn('Sell order executed');
+      consoleJS.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
       logger.info('Vente au prix de : $', sell);
       logger.trace('Benef : $', Number(sell) - Number(buy));
@@ -166,9 +100,9 @@ function makeDecisions(lastCandle) {
   }
 }
 
-function initCouchbase(previousCandles, period) {
-  initJSON(previousCandles, period);
-  bucket.upsert('values', candlesJSON, function (err) {
+function initCouchbase(previousCandles) {
+  bucket.upsert('values',
+    initJSON(previousCandles), function (err) {
     if (err) console.error("Couldn't store document: %j", err);
     else {
       consoleJS.info('Couchbase initialised.');
@@ -177,17 +111,20 @@ function initCouchbase(previousCandles, period) {
   });
 }
 
-function initJSON(previousCandles, period) {
+function initJSON(previousCandles) {
+  let candlesJSON = [];
+  let period = config.RSIperiod;
+
   previousCandles.reverse();
 
   for (let i = 1; i < previousCandles.length; i++) {
     candlesJSON.push(
       {
-        MTS: previousCandles[i][0],
+        MTS: previousCandles[i].mts,
         DATA:
           {
-            CLOSE: previousCandles[i][2],
-            DIFF: previousCandles[i][2] - previousCandles[i - 1][2],
+            CLOSE: previousCandles[i].close,
+            DIFF: previousCandles[i].close - previousCandles[i - 1].close,
             AVGGAIN: '',
             AVGLOSS: '',
             RSI: ''
@@ -198,7 +135,7 @@ function initJSON(previousCandles, period) {
 
   let avgGain = 0;
   let avgLoss = 0;
-  for (let i = 1; i < Number(period) + 1; i++) {
+  for (let i = 1; i <= period; i++) {
     let candle = candlesJSON[i].DATA;
     if (candle.DIFF > 0) {
       avgGain += candle.DIFF;
@@ -229,14 +166,15 @@ function initJSON(previousCandles, period) {
     }
     candle.RSI = 100 - (100 / (1 + (candle.AVGGAIN / candle.AVGLOSS)));
   }
+  previousCandles.reverse();
+  return candlesJSON;
 }
 
-function retrieveDocumentAndUpdate(response) {
+function retrieveDocumentAndUpdate(lastCandle) {
   bucket.get('values', function (err, result) {
     if (err) console.log('Some error occurred: %j', err);
     else {
-      let documentCB = result.value;
-      updateJSON(documentCB, response);
+      updateJSON(result.value, lastCandle);
     }
   });
 }
@@ -251,15 +189,16 @@ function getDocument() {
   });
 }
 
-function updateJSON(documentCB, candleBitfinex) {
-  let search = getObjects(documentCB, 'MTS', candleBitfinex[0]);
+function updateJSON(candlesCouchbase, lastCandle) {
+  let search = getObjects(candlesCouchbase, 'MTS', lastCandle.mts);
   if (search.length === 0) {
-    documentCB.push(
+    candlesCouchbase.push(
       {
-        MTS: candleBitfinex[0],
+        MTS: lastCandle.mts,
+        DATE: new Date(lastCandle.mts).toLocaleTimeString(),
         DATA:
           {
-            CLOSE: candleBitfinex[2],
+            CLOSE: lastCandle.close,
             DIFF: '',
             AVGGAIN: '',
             AVGLOSS: '',
@@ -268,38 +207,39 @@ function updateJSON(documentCB, candleBitfinex) {
       }
     );
   }
-  updateCouchbase(documentCB, candleBitfinex);
+  updateCouchbase(candlesCouchbase, lastCandle);
 }
 
-function updateCouchbase(documentCB, candleBitfinex) {
-  let newJSON = updateCandle(documentCB, candleBitfinex);
-  bucket.upsert('values', newJSON, function (err) {
+function updateCouchbase(candlesCouchbase, lastCandle) {
+  bucket.upsert('values',
+    updateCandle(candlesCouchbase, lastCandle), function (err) {
     if (err) console.error("Couldn't store document: %j", err);
   });
 }
 
-function updateCandle(documentCB, candleBitfinex) {
-  let previousCandle = getObjects(documentCB, 'MTS', Number(candleBitfinex[0]) - 60000 * Number(MTS))[0].DATA;
-  for (let i = 0; i < documentCB.length; i++) {
-    if (documentCB[i].MTS === candleBitfinex[0]) {
-      documentCB[i].DATA.CLOSE = candleBitfinex[2];
-      documentCB[i].DATA.DIFF = Number(candleBitfinex[2]) - Number(previousCandle.CLOSE);
+function updateCandle(candlesCouchbase, lastCandle) {
+  let period = config.RSIperiod;
+  let previousCandle = getObjects(candlesCouchbase, 'MTS', lastCandle.mts - (60000 * config.timestamp))[0].DATA;
+  for (let i = 0; i < candlesCouchbase.length; i++) {
+    if (candlesCouchbase[i].MTS === lastCandle.mts) {
+      candlesCouchbase[i].DATA.CLOSE = lastCandle.close;
+      candlesCouchbase[i].DATA.DIFF = Number(lastCandle.close) - Number(previousCandle.CLOSE);
 
-      if (documentCB[i].DATA.DIFF > 0) {
-        documentCB[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1) + documentCB[i].DATA.DIFF) / period;
-        documentCB[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1)) / period;
-      } else if (documentCB[i].DATA.DIFF < 0) {
-        documentCB[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1)) / period;
-        documentCB[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1) + Math.abs(documentCB[i].DATA.DIFF)) / period;
+      if (candlesCouchbase[i].DATA.DIFF > 0) {
+        candlesCouchbase[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1) + candlesCouchbase[i].DATA.DIFF) / period;
+        candlesCouchbase[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1)) / period;
+      } else if (candlesCouchbase[i].DATA.DIFF < 0) {
+        candlesCouchbase[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1)) / period;
+        candlesCouchbase[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1) + Math.abs(candlesCouchbase[i].DATA.DIFF)) / period;
       } else {
-        documentCB[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1)) / period;
-        documentCB[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1)) / period;
+        candlesCouchbase[i].DATA.AVGGAIN = (previousCandle.AVGGAIN * (period - 1)) / period;
+        candlesCouchbase[i].DATA.AVGLOSS = (previousCandle.AVGLOSS * (period - 1)) / period;
       }
-      documentCB[i].DATA.RSI = 100 - (100 / (1 + (documentCB[i].DATA.AVGGAIN / documentCB[i].DATA.AVGLOSS)));
+      candlesCouchbase[i].DATA.RSI = 100 - (100 / (1 + (candlesCouchbase[i].DATA.AVGGAIN / candlesCouchbase[i].DATA.AVGLOSS)));
       break;
     }
   }
-  return documentCB;
+  return candlesCouchbase;
 }
 
 function getObjects(obj, key, val) {
