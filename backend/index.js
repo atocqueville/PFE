@@ -31,15 +31,18 @@ let log4js = require('log4js');
 log4js.configure({
   appenders: {
     tradesLogs: { type: 'file', filename: 'logger.log' },
+    responseLogs: {type: 'file', filename: 'responseLogs.log'},
     console: { type: 'console' }
   },
   categories: {
     trades: { appenders: ['tradesLogs'], level: 'trace' },
     csl: {appenders: ['console'], level: 'trace'},
+    response: {appenders: ['responseLogs'], level: 'trace'},
     default: { appenders: ['console'], level: 'trace' }
   }
 });
 const logger = log4js.getLogger('trades');
+const responselogger = log4js.getLogger('response');
 const consoleJS = log4js.getLogger('csl');
 
 let long = false;
@@ -79,6 +82,7 @@ wsCandles.onopen = () => {
 
   wsCandles.onmessage = (msg) => {
     let response = JSON.parse(msg.data);
+    responselogger.trace(response);
     if (response[1] === 'hb') {
     } else {
       if (count < 3) {
