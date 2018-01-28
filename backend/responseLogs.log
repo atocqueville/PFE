@@ -1,0 +1,13 @@
+[2018-01-28T20:23:53.706] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T20:24:48.084] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:04:54.957] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:05:41.341] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:07:42.049] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:12:02.135] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:12:17.033] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:12:34.303] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:16:00.092] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:16:47.869] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:17:27.346] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:17:40.439] [TRACE] response - { event: 'info', version: 2 }
+[2018-01-28T21:17:47.487] [TRACE] response - { event: 'info', version: 2 }

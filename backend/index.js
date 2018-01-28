@@ -1,9 +1,49 @@
 const WebSocket = require('ws');
 const wsCandles = new WebSocket('wss://api.bitfinex.com/ws/2');
 
-// let apiKeys = require('./apikeys.json');
-// const keyPublic = apiKeys.public;
-// const keySecret = apiKeys.private;
+let apiKeys = require('./apikeys.json');
+
+const BFX = require('bitfinex-api-node');
+const bfx = new BFX({
+  apiKey: apiKeys.public,
+  apiSecret: apiKeys.private,
+
+  ws: {
+    autoReconnect: true,
+    seqAudit: true,
+    packetWDDelay: 10 * 1000
+  }
+});
+const ws = bfx.ws(2, {
+  manageCandles: true,  // enable candle dataset persistence/management
+  transform: true       // converts ws data arrays to Candle models (and others)
+});
+const CANDLE_KEY = 'trade:1m:tBTCUSD';
+
+ws.on('open', () => {
+  ws.subscribeCandles(CANDLE_KEY);
+});
+
+let prevTS = null;
+
+// 'candles' here is an array
+ws.onCandle({key: CANDLE_KEY}, (candles) => {
+  console.log(candles[0]);
+  if (prevTS === null || candles[0].mts > prevTS) {
+    const c = candles[1]; // report previous candle
+
+    console.log(`%s %s open: %f, high: %f, low: %f, close: %f, volume: %f`,
+      CANDLE_KEY, new Date(c.mts).toLocaleTimeString(),
+      c.open, c.high, c.low, c.close, c.volume
+    );
+
+    prevTS = candles[0].mts
+  }
+});
+
+ws.open();
+
+
 
 let config = require('./config.json');
 const period = config.period;
@@ -78,7 +118,7 @@ wsCandles.onopen = () => {
   // te = trade executed
   // tu = trade execution update
 
-  wsCandles.send(JSON.stringify(msg));
+  // wsCandles.send(JSON.stringify(msg));
 
   wsCandles.onmessage = (msg) => {
     let response = JSON.parse(msg.data);
