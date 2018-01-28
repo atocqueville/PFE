@@ -13,6 +13,12 @@ const currency = config.currency;
 let couchbase = require('couchbase');
 let cluster = new couchbase.Cluster('127.0.0.1');
 cluster.authenticate('Tokie', 'detoka');
+let bucket = cluster.openBucket('candles', function (err) {
+  if (err) {
+    console.log('cant open bucket');
+    throw err;
+  }
+});
 
 let candlesJSON = [];
 
@@ -33,6 +39,7 @@ log4js.configure({
   }
 });
 const logger = log4js.getLogger('trades');
+const consoleJS = log4js.getLogger();
 
 let long = false;
 let buy;
@@ -75,8 +82,17 @@ wsCandles.onopen = () => {
     } else {
       if (count < 3) {
         if (count === 2) {
-          console.log('RSI Bot is on..');
+          console.log('\n' +
+            '\n' +
+            '            ____        __     ____ _____ ____       \n' +
+            '           / __ )____  / /_   / __ / ___//  _/       \n' +
+            ' ______   / __  / __ \\/ __/  / /_/ \\__ \\ / /   ______\n' +
+            '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
+            '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
+            '                                                     \n' +
+            '\n');
           let previousCandles = response[1];
+          consoleJS.trace('Initialising Couchbase..');
           initCouchbase(previousCandles, period);
         }
         count++;
@@ -90,14 +106,14 @@ wsCandles.onopen = () => {
 function makeDecisions(lastCandle) {
   if (!long) {
     if (lastCandle.RSI <= 30) {
-      console.log('order executed');
+      consoleJS.warn('order executed');
       buy = lastCandle.CLOSE;
       logger.info('achat au prix de : $', buy);
       long = true;
     }
   } else if (long) {
     if (lastCandle.RSI >= 70) {
-      console.log('order executed');
+      consoleJS.warn('order executed');
       sell = lastCandle.CLOSE;
       logger.info('vente au prix de : $', sell);
       logger.trace('benef : $', Number(sell) - Number(buy));
@@ -107,24 +123,14 @@ function makeDecisions(lastCandle) {
 }
 
 function initCouchbase(previousCandles, period) {
-  let bucket = cluster.openBucket('candles', function(err) {
+  initJSON(previousCandles, period);
+  bucket.upsert('values', candlesJSON, function (err) {
     if (err) {
-      console.log('cant open bucket');
-      throw err;
+      console.error("Couldn't store document: %j", err);
+    } else {
+      consoleJS.info('Couchbase initialised');
+      consoleJS.trace('Waiting for trades..');
     }
-
-    initJSON(previousCandles, period);
-
-    bucket.upsert('values',
-      candlesJSON
-      , function(err) {
-        if (!err) {
-         // console.log("stored document successfully. CAS is %j", result.cas);
-        } else {
-          console.error("Couldn't store document: %j", err);
-        }
-      });
-    bucket.disconnect();
   });
 }
 
@@ -183,40 +189,24 @@ function initJSON(previousCandles, period) {
 }
 
 function retrieveDocumentAndUpdate(response) {
-  let bucket = cluster.openBucket('candles', function (err) {
+  bucket.get('values', function (err, result) {
     if (err) {
-      console.log('cant open bucket');
-      throw err;
+      console.log('Some error occurred: %j', err);
+    } else {
+      let documentCB = result.value;
+      updateJSON(documentCB, response);
     }
-
-    bucket.get('values', function (err, result) {
-      if (err) {
-        console.log('Some error occurred: %j', err);
-      } else {
-        let documentCB = result.value;
-        updateJSON(documentCB, response);
-      }
-    });
-    bucket.disconnect();
   });
 }
 
 function getDocument() {
-  let bucket = cluster.openBucket('candles', function (err) {
+  bucket.get('values', function (err, result) {
     if (err) {
-      console.log('cant open bucket');
-      throw err;
+      console.log('Some error occurred: %j', err);
+    } else {
+      let lastCandle = result.value.reverse()[0].DATA;
+      makeDecisions(lastCandle);
     }
-
-    bucket.get('values', function (err, result) {
-      if (err) {
-        console.log('Some error occurred: %j', err);
-      } else {
-        let lastCandle = result.value.reverse()[0].DATA;
-        makeDecisions(lastCandle);
-      }
-    });
-    bucket.disconnect();
   });
 }
 
