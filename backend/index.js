@@ -35,11 +35,12 @@ log4js.configure({
   },
   categories: {
     trades: { appenders: ['tradesLogs'], level: 'trace' },
+    csl: {appenders: ['console'], level: 'trace'},
     default: { appenders: ['console'], level: 'trace' }
   }
 });
 const logger = log4js.getLogger('trades');
-const consoleJS = log4js.getLogger();
+const consoleJS = log4js.getLogger('csl');
 
 let long = false;
 let buy;
@@ -83,7 +84,6 @@ wsCandles.onopen = () => {
       if (count < 3) {
         if (count === 2) {
           console.log('\n' +
-            '\n' +
             '            ____        __     ____ _____ ____       \n' +
             '           / __ )____  / /_   / __ / ___//  _/       \n' +
             ' ______   / __  / __ \\/ __/  / /_/ \\__ \\ / /   ______\n' +
@@ -106,14 +106,14 @@ wsCandles.onopen = () => {
 function makeDecisions(lastCandle) {
   if (!long) {
     if (lastCandle.RSI <= 30) {
-      consoleJS.warn('order executed');
+      consoleJS.warn('buy order executed');
       buy = lastCandle.CLOSE;
       logger.info('achat au prix de : $', buy);
       long = true;
     }
   } else if (long) {
     if (lastCandle.RSI >= 70) {
-      consoleJS.warn('order executed');
+      consoleJS.warn('sell order executed');
       sell = lastCandle.CLOSE;
       logger.info('vente au prix de : $', sell);
       logger.trace('benef : $', Number(sell) - Number(buy));
