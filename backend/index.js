@@ -18,8 +18,6 @@ const ws = bfx.ws(2, {
 });
 const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
-// new Date(c.mts).toLocaleTimeString()
-
 let couchbase = require('couchbase');
 let cluster = new couchbase.Cluster('127.0.0.1');
 cluster.authenticate('Tokie', 'detoka');
@@ -94,7 +92,7 @@ function makeDecisions(lastCandle) {
       consoleJS.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
       logger.info('Vente au prix de : $', sell);
-      logger.trace('Benef : $', Number(sell) - Number(buy));
+      logger.trace('Variation : %', ((sell / buy) - 1) * 100);
       long = false;
     }
   }
