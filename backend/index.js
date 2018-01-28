@@ -106,17 +106,17 @@ wsCandles.onopen = () => {
 function makeDecisions(lastCandle) {
   if (!long) {
     if (lastCandle.RSI <= 30) {
-      consoleJS.warn('buy order executed');
+      consoleJS.warn('Buy order executed');
       buy = lastCandle.CLOSE;
-      logger.info('achat au prix de : $', buy);
+      logger.info('Achat au prix de : $', buy);
       long = true;
     }
   } else if (long) {
     if (lastCandle.RSI >= 70) {
-      consoleJS.warn('sell order executed');
+      consoleJS.warn('Sell order executed');
       sell = lastCandle.CLOSE;
-      logger.info('vente au prix de : $', sell);
-      logger.trace('benef : $', Number(sell) - Number(buy));
+      logger.info('Vente au prix de : $', sell);
+      logger.trace('Benef : $', Number(sell) - Number(buy));
       long = false;
     }
   }
@@ -129,7 +129,7 @@ function initCouchbase(previousCandles, period) {
       console.error("Couldn't store document: %j", err);
     } else {
       consoleJS.info('Couchbase initialised');
-      consoleJS.trace('Waiting for trades..');
+      consoleJS.trace('Waiting for trades..\n');
     }
   });
 }
