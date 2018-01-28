@@ -125,10 +125,9 @@ function makeDecisions(lastCandle) {
 function initCouchbase(previousCandles, period) {
   initJSON(previousCandles, period);
   bucket.upsert('values', candlesJSON, function (err) {
-    if (err) {
-      console.error("Couldn't store document: %j", err);
-    } else {
-      consoleJS.info('Couchbase initialised');
+    if (err) console.error("Couldn't store document: %j", err);
+    else {
+      consoleJS.info('Couchbase initialised.');
       consoleJS.trace('Waiting for trades..\n');
     }
   });
@@ -190,9 +189,8 @@ function initJSON(previousCandles, period) {
 
 function retrieveDocumentAndUpdate(response) {
   bucket.get('values', function (err, result) {
-    if (err) {
-      console.log('Some error occurred: %j', err);
-    } else {
+    if (err) console.log('Some error occurred: %j', err);
+    else {
       let documentCB = result.value;
       updateJSON(documentCB, response);
     }
@@ -201,9 +199,8 @@ function retrieveDocumentAndUpdate(response) {
 
 function getDocument() {
   bucket.get('values', function (err, result) {
-    if (err) {
-      console.log('Some error occurred: %j', err);
-    } else {
+    if (err) console.log('Some error occurred: %j', err);
+    else {
       let lastCandle = result.value.reverse()[0].DATA;
       makeDecisions(lastCandle);
     }
@@ -211,9 +208,7 @@ function getDocument() {
 }
 
 function updateJSON(documentCB, candleBitfinex) {
-
   let search = getObjects(documentCB, 'MTS', candleBitfinex[0]);
-
   if (search.length === 0) {
     documentCB.push(
       {
@@ -233,30 +228,14 @@ function updateJSON(documentCB, candleBitfinex) {
 }
 
 function updateCouchbase(documentCB, candleBitfinex) {
-
   let newJSON = updateCandle(documentCB, candleBitfinex);
-
-  let bucket = cluster.openBucket('candles', function(err) {
-      if (err) {
-          console.log('cant open bucket');
-          throw err;
-      }
-      bucket.upsert('values',
-          newJSON
-          , function(err) {
-              if (!err) {
-              //    console.log("stored document successfully. CAS is %j", result.cas);
-              } else {
-                  console.error("Couldn't store document: %j", err);
-              }
-          });
+  bucket.upsert('values', newJSON, function (err) {
+    if (err) console.error("Couldn't store document: %j", err);
   });
 }
 
 function updateCandle(documentCB, candleBitfinex) {
-
   let previousCandle = getObjects(documentCB, 'MTS', Number(candleBitfinex[0]) - 60000 * Number(MTS))[0].DATA;
-
   for (let i = 0; i < documentCB.length; i++) {
     if (documentCB[i].MTS === candleBitfinex[0]) {
       documentCB[i].DATA.CLOSE = candleBitfinex[2];
