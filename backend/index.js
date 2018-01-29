@@ -1,6 +1,8 @@
 let apiKeys = require('./apikeys.json');
 
 let config = require('./config.json');
+const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
+//const { Order } = require('node_modules/bitfinex-api-node/lib/models/order');
 
 const BFX = require('bitfinex-api-node');
 const bfx = new BFX({
@@ -12,11 +14,11 @@ const bfx = new BFX({
     packetWDDelay: 10 * 1000
   }
 });
-const ws = bfx.ws(2, {
+const wsCandle = bfx.ws(2, {
   manageCandles: true,
   transform: true
 });
-const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
+const wsAuth = bfx.ws(2);
 
 let couchbase = require('couchbase');
 let cluster = new couchbase.Cluster('127.0.0.1');
@@ -37,30 +39,97 @@ let log4js = require('log4js');
 log4js.configure({
   appenders: {
     tradesLogs: { type: 'file', filename: 'logger.log' },
-    responseLogs: {type: 'file', filename: 'responseLogs.log'},
+    responseLogs: {type: 'file', filename: 'response.log'},
+    errorLogs: {type: 'file', filename: 'errors.log'},
     console: { type: 'console' }
   },
   categories: {
     trades: { appenders: ['tradesLogs'], level: 'trace' },
-    csl: {appenders: ['console'], level: 'trace'},
     response: {appenders: ['responseLogs'], level: 'trace'},
+    error: {appenders: ['errorLogs'], level: 'trace'},
     default: { appenders: ['console'], level: 'trace' }
   }
 });
 const logger = log4js.getLogger('trades');
 const responselogger = log4js.getLogger('response');
-const consoleJS = log4js.getLogger('csl');
+const errorLogger = log4js.getLogger('error');
+const consoleJS = log4js.getLogger('');
 
 let init = true;
 let long = false;
 let buy;
 let sell;
 
-ws.on('open', () => {
-  ws.subscribeCandles(CANDLE_KEY);
+wsCandle.on('open', () => {
+  wsCandle.subscribeCandles(CANDLE_KEY);
 });
 
-ws.onCandle({key: CANDLE_KEY}, (candles) => {
+wsCandle.on('error', (err) => {
+  console.log('candle error', err);
+});
+
+// wsAuth.on('open', () => {
+//   console.log('open');
+//   wsAuth.auth()
+// });
+//
+// wsAuth.on('error', (err) => {
+//   console.log('auth error', err);
+// });
+//
+// wsAuth.once('auth', () => {
+//   console.log('authenticated');
+
+// Build new order
+// const o = new Order({
+//   cid: Date.now(),
+//   symbol: 'tBTCUSD',
+//   price: 589.10,
+//   amount: -0.01,
+//   type: Order.type.EXCHANGE_LIMIT
+// }, wsAuth);
+//
+// let closed = false;
+
+// Enable automatic updates
+// o.registerListeners();
+//
+// o.on('update', () => {
+//   console.log('order updated: %j', o.serialize());
+// });
+//
+// o.on('close', () => {
+//   console.log('order closed: %s', o.status);
+//   closed = true
+// });
+//
+// console.log('submitting order %d', o.cid);
+
+// o.submit().then(() => {
+//   console.log('got submit confirmation for order %d [%d]', o.cid, o.id);
+//
+//    wait a bit...
+//   setTimeout(() => {
+//     if (closed) return;
+//
+//     console.log('canceling...');
+//
+//     o.cancel().then(() => {
+//       console.log('got cancel confirmation for order %d', o.cid);
+//     }).catch((err) => {
+//       console.log('error cancelling order: %j', err);
+//     })
+//   }, 2000)
+//  }).catch((err) => {
+//   console.log(err)
+//  });
+// });
+
+// wsAuth.open();
+
+wsCandle.on('error', (err) => errorLogger.info(err));
+
+wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
   responselogger.trace(candles[0]);
   if (init) {
     console.log('\n' +
@@ -77,7 +146,7 @@ ws.onCandle({key: CANDLE_KEY}, (candles) => {
   }
   retrieveDocumentAndUpdate(candles[0]);
 });
-ws.open();
+wsCandle.open();
 
 function makeDecisions(lastCandle) {
   if (!long) {

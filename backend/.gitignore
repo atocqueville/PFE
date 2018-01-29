@@ -10,4 +10,5 @@
 npm-debug.log
 apikeys.json
 logger.log
-responseLogs.log
+response.log
+errors.log
