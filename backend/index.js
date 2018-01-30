@@ -2,7 +2,7 @@ let apiKeys = require('./apikeys.json');
 
 let config = require('./config.json');
 const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
-// const { Order } = require('node_modules/bitfinex-api-node/lib/models/order');
+const {Order} = require('bitfinex-api-node/lib/models');
 
 // Error: unexpected server response (525)
 
@@ -16,6 +16,7 @@ const bfx = new BFX({
     packetWDDelay: 10 * 1000
   }
 });
+
 const wsCandle = bfx.ws(2, {
   manageCandles: true,
   transform: true
@@ -66,72 +67,7 @@ let sell;
 wsCandle.on('open', () => {
   wsCandle.subscribeCandles(CANDLE_KEY);
 });
-
-wsCandle.on('error', (err) => {
-  console.log('candle error', err);
-});
-
-// wsAuth.on('open', () => {
-//   console.log('open');
-//   wsAuth.auth()
-// });
-//
-// wsAuth.on('error', (err) => {
-//   console.log('auth error', err);
-// });
-//
-// wsAuth.once('auth', () => {
-//   console.log('authenticated');
-
-// Build new order
-// const o = new Order({
-//   cid: Date.now(),
-//   symbol: 'tBTCUSD',
-//   price: 589.10,
-//   amount: -0.01,
-//   type: Order.type.EXCHANGE_LIMIT
-// }, wsAuth);
-//
-// let closed = false;
-
-// Enable automatic updates
-// o.registerListeners();
-//
-// o.on('update', () => {
-//   console.log('order updated: %j', o.serialize());
-// });
-//
-// o.on('close', () => {
-//   console.log('order closed: %s', o.status);
-//   closed = true
-// });
-//
-// console.log('submitting order %d', o.cid);
-
-// o.submit().then(() => {
-//   console.log('got submit confirmation for order %d [%d]', o.cid, o.id);
-//
-//    wait a bit...
-//   setTimeout(() => {
-//     if (closed) return;
-//
-//     console.log('canceling...');
-//
-//     o.cancel().then(() => {
-//       console.log('got cancel confirmation for order %d', o.cid);
-//     }).catch((err) => {
-//       console.log('error cancelling order: %j', err);
-//     })
-//   }, 2000)
-//  }).catch((err) => {
-//   console.log(err)
-//  });
-// });
-
-// wsAuth.open();
-
 wsCandle.on('error', (err) => errorLogger.info(err));
-
 wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
   // responselogger.trace(candles[0]);
   if (init) {
@@ -146,29 +82,70 @@ wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
     consoleJS.trace('Initialising Couchbase..');
     initCouchbase(candles);
     init = false;
+    // transferer les deux dernieres candles sur un nouveau fichier
+
   }
   retrieveDocumentAndUpdate(candles[0]);
 });
 wsCandle.open();
 
-function makeDecisions(lastCandle) {
-  if (!long) {
-    if (lastCandle.RSI <= 30) {
-      consoleJS.warn('Buy order executed');
-      buy = lastCandle.CLOSE;
-      logger.info('Achat au prix de : $', buy);
-      long = true;
-    }
-  } else if (long) {
-    if (lastCandle.RSI >= 70) {
-      consoleJS.warn('Sell order executed\n');
-      sell = lastCandle.CLOSE;
-      logger.info('Vente au prix de : $', sell);
-      logger.trace('Variation : %', ((sell / buy) - 1) * 100);
-      long = false;
-    }
-  }
-}
+wsAuth.on('open', () => {
+  console.log('open');
+  wsAuth.auth();
+});
+wsAuth.on('error', (err) => {
+  console.log('auth error', err);
+});
+wsAuth.once('auth', () => {
+  console.log('authenticated');
+
+  // Build new order
+  const o = new Order({
+    cid: Date.now(),
+    symbol: 'tBTCUSD',
+    price: 5000,
+    amount: -0.01,
+    type: Order.type.EXCHANGE_LIMIT
+  }, wsAuth);
+
+  let closed = false;
+
+  // Enable automatic updates
+  o.registerListeners();
+
+  o.on('update', () => {
+    console.log('order updated: %j', o.serialize());
+  });
+
+  o.on('close', () => {
+    console.log('order closed: %s', o.status);
+    closed = true
+  });
+
+  console.log('submitting order %d', o.cid);
+
+  o.submit().then(() => {
+    console.log('got submit confirmation for order %d [%d]', o.cid, o.id);
+
+    // wait a bit...
+    setTimeout(() => {
+      if (closed) return;
+
+      console.log('canceling...');
+
+      o.cancel().then(() => {
+        console.log('got cancel confirmation for order %d', o.cid);
+      }).catch((err) => {
+        console.log('error cancelling order: %j', err);
+      })
+    }, 2000)
+  }).catch((err) => {
+    console.log(err)
+  });
+});
+
+// wsAuth.open();
+
 
 function initCouchbase(previousCandles) {
   bucket.upsert('values',
@@ -310,6 +287,25 @@ function updateCandle(candlesCouchbase, lastCandle) {
     }
   }
   return candlesCouchbase;
+}
+
+function makeDecisions(lastCandle) {
+  if (!long) {
+    if (lastCandle.RSI <= 30) {
+      consoleJS.warn('Buy order executed');
+      buy = lastCandle.CLOSE;
+      logger.info('Achat au prix de : $', buy);
+      long = true;
+    }
+  } else if (long) {
+    if (lastCandle.RSI >= 70) {
+      consoleJS.warn('Sell order executed\n');
+      sell = lastCandle.CLOSE;
+      logger.info('Vente au prix de : $', sell);
+      logger.trace('Variation : %', ((sell / buy) - 1) * 100);
+      long = false;
+    }
+  }
 }
 
 function getObjects(obj, key, val) {
