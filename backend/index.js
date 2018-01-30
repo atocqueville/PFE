@@ -78,7 +78,7 @@ wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
       '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
       '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
       '                                                     \n' +
-      'v1.0.1\n');
+      'v1.0.2  /  ' + config.currency + '\n');
     consoleJS.trace('Initialising Couchbase..');
     initCouchbase(candles);
     init = false;
