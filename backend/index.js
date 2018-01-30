@@ -2,7 +2,9 @@ let apiKeys = require('./apikeys.json');
 
 let config = require('./config.json');
 const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
-//const { Order } = require('node_modules/bitfinex-api-node/lib/models/order');
+// const { Order } = require('node_modules/bitfinex-api-node/lib/models/order');
+
+// Error: unexpected server response (525)
 
 const BFX = require('bitfinex-api-node');
 const bfx = new BFX({
@@ -29,6 +31,7 @@ let bucket = cluster.openBucket('candles', function (err) {
     throw err;
   }
 });
+bucket.operationTimeout = 60 * 1000; // 60 seconds operation timeout (LCB_CNTL_OP_TIMEOUT)
 
 let cron = require('node-cron');
 cron.schedule('*/5 * * * * *', function () {
@@ -130,7 +133,7 @@ wsCandle.on('error', (err) => {
 wsCandle.on('error', (err) => errorLogger.info(err));
 
 wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
-  responselogger.trace(candles[0]);
+  // responselogger.trace(candles[0]);
   if (init) {
     console.log('\n' +
       '            ____        __     ____ _____ ____       \n' +
@@ -139,7 +142,7 @@ wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
       '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
       '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
       '                                                     \n' +
-      'v1.0.0\n');
+      'v1.0.1\n');
     consoleJS.trace('Initialising Couchbase..');
     initCouchbase(candles);
     init = false;
