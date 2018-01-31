@@ -5,12 +5,6 @@ const bucket = require('./bucket');
 const {Order} = require('bitfinex-api-node/lib/models');
 const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
-const wsCandle = bfx.ws(2, {
-  manageCandles: true,
-  transform: true
-});
-const wsAuth = bfx.ws(2);
-
 let cron = require('node-cron');
 cron.schedule('*/5 * * * * *', function () {
   getDocument();
@@ -24,6 +18,12 @@ let init = true;
 let long = false;
 let buy;
 let sell;
+
+const wsCandle = bfx.ws(2, {
+  manageCandles: true,
+  transform: true
+});
+const wsAuth = bfx.ws(2);
 
 wsCandle.on('open', () => {
   wsCandle.subscribeCandles(CANDLE_KEY);
