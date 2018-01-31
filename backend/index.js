@@ -1,21 +1,9 @@
-let apiKeys = require('./apikeys.json');
-
-let config = require('./config.json');
-const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
+const config = require('./config.json');
+const log4js = require('./logger');
+const bfx = require('./bfx');
+const bucket = require('./bucket');
 const {Order} = require('bitfinex-api-node/lib/models');
-
-// Error: unexpected server response (525)
-
-const BFX = require('bitfinex-api-node');
-const bfx = new BFX({
-  apiKey: apiKeys.public,
-  apiSecret: apiKeys.private,
-  ws: {
-    autoReconnect: true,
-    seqAudit: true,
-    packetWDDelay: 10 * 1000
-  }
-});
+const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
 const wsCandle = bfx.ws(2, {
   manageCandles: true,
@@ -23,39 +11,12 @@ const wsCandle = bfx.ws(2, {
 });
 const wsAuth = bfx.ws(2);
 
-let couchbase = require('couchbase');
-let cluster = new couchbase.Cluster('127.0.0.1');
-cluster.authenticate('Tokie', 'detoka');
-let bucket = cluster.openBucket('candles', function (err) {
-  if (err) {
-    console.log('cant open bucket');
-    throw err;
-  }
-});
-bucket.operationTimeout = 60 * 1000; // 60 seconds operation timeout (LCB_CNTL_OP_TIMEOUT)
-
 let cron = require('node-cron');
 cron.schedule('*/5 * * * * *', function () {
   getDocument();
 });
 
-let log4js = require('log4js');
-log4js.configure({
-  appenders: {
-    tradesLogs: { type: 'file', filename: 'logger.log' },
-    responseLogs: {type: 'file', filename: 'response.log'},
-    errorLogs: {type: 'file', filename: 'errors.log'},
-    console: { type: 'console' }
-  },
-  categories: {
-    trades: { appenders: ['tradesLogs'], level: 'trace' },
-    response: {appenders: ['responseLogs'], level: 'trace'},
-    error: {appenders: ['errorLogs'], level: 'trace'},
-    default: { appenders: ['console'], level: 'trace' }
-  }
-});
 const logger = log4js.getLogger('trades');
-const responselogger = log4js.getLogger('response');
 const errorLogger = log4js.getLogger('error');
 const consoleJS = log4js.getLogger('');
 
@@ -69,7 +30,6 @@ wsCandle.on('open', () => {
 });
 wsCandle.on('error', (err) => errorLogger.info(err));
 wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
-  // responselogger.trace(candles[0]);
   if (init) {
     console.log('\n' +
       '            ____        __     ____ _____ ____       \n' +
@@ -78,12 +38,10 @@ wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
       '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
       '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
       '                                                     \n' +
-      'v1.0.2  /  ' + config.currency + '\n');
+      'v1.1.0  /  ' + config.currency + '\n');
     consoleJS.trace('Initialising Couchbase..');
     initCouchbase(candles);
     init = false;
-    // transferer les deux dernieres candles sur un nouveau fichier
-
   }
   retrieveDocumentAndUpdate(candles[0]);
 });
@@ -143,15 +101,15 @@ wsAuth.once('auth', () => {
     console.log(err)
   });
 });
-
 // wsAuth.open();
 
 
 function initCouchbase(previousCandles) {
-  bucket.upsert('values',
+  bucket.upsert('oldCandles',
     initJSON(previousCandles), function (err) {
     if (err) console.error("Couldn't store document: %j", err);
     else {
+      transferLastCandles();
       consoleJS.info('Couchbase initialised.');
       consoleJS.trace('Waiting for trades..\n');
     }
@@ -168,6 +126,7 @@ function initJSON(previousCandles) {
     candlesJSON.push(
       {
         MTS: previousCandles[i].mts,
+        DATE: new Date(previousCandles[i].mts).toLocaleTimeString(),
         DATA:
           {
             CLOSE: previousCandles[i].close,
@@ -217,9 +176,25 @@ function initJSON(previousCandles) {
   return candlesJSON;
 }
 
+function transferLastCandles() {
+  bucket.get('oldCandles', function (err, result) {
+    if (err) console.log('Some error occurred : %j', err);
+    else createNewDocument(result.value);
+  });
+}
+
+function createNewDocument(candlesCouchbase) {
+  candlesCouchbase.reverse();
+  bucket.upsert('newCandles',
+    [candlesCouchbase[1], candlesCouchbase[0]],
+    function (err) {
+      if (err) console.error("Couldn't store document: %j", err);
+    });
+}
+
 function retrieveDocumentAndUpdate(lastCandle) {
-  bucket.get('values', function (err, result) {
-    if (err) console.log('Some error occurred: %j', err);
+  bucket.get('newCandles', function (err, result) {
+    if (err) console.log('Some error occurred ! : %j', err);
     else {
       updateJSON(result.value, lastCandle);
     }
@@ -227,7 +202,7 @@ function retrieveDocumentAndUpdate(lastCandle) {
 }
 
 function getDocument() {
-  bucket.get('values', function (err, result) {
+  bucket.get('newCandles', function (err, result) {
     if (err) console.log('Some error occurred: %j', err);
     else {
       let lastCandle = result.value.reverse()[0].DATA;
@@ -258,7 +233,7 @@ function updateJSON(candlesCouchbase, lastCandle) {
 }
 
 function updateCouchbase(candlesCouchbase, lastCandle) {
-  bucket.upsert('values',
+  bucket.upsert('newCandles',
     updateCandle(candlesCouchbase, lastCandle), function (err) {
     if (err) console.error("Couldn't store document: %j", err);
   });
