@@ -38,7 +38,7 @@ wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
       '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
       '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
       '                                                     \n' +
-      'v1.1.0  /  ' + config.currency + '\n');
+      'v1.1.1  /  ' + config.currency + '\n');
     consoleJS.trace('Initialising Couchbase..');
     initCouchbase(candles);
     init = false;
@@ -61,9 +61,8 @@ wsAuth.once('auth', () => {
   const o = new Order({
     cid: Date.now(),
     symbol: 'tBTCUSD',
-    price: 5000,
-    amount: -0.01,
-    type: Order.type.EXCHANGE_LIMIT
+    amount: -0.0020958,
+    type: Order.type.EXCHANGE_MARKET
   }, wsAuth);
 
   let closed = false;
@@ -189,7 +188,13 @@ function createNewDocument(candlesCouchbase) {
     [candlesCouchbase[1], candlesCouchbase[0]],
     function (err) {
       if (err) console.error("Couldn't store document: %j", err);
+      else {
+        bucket.remove('oldCandles', function (err) {
+          if (err) console.error("Couldn't store document: %j", err);
+        });
+      }
     });
+
 }
 
 function retrieveDocumentAndUpdate(lastCandle) {
