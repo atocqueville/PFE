@@ -2,7 +2,7 @@ const config = require('./config.json');
 const log4js = require('./logger');
 const bfx = require('./bfx');
 const mongoUtil = require('./mongodb');
-const {Order} = require('bitfinex-api-node/lib/models');
+// const {Order} = require('bitfinex-api-node/lib/models');
 const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
 let cron = require('node-cron');
