@@ -1,13 +1,12 @@
 const config = require('./config.json');
 const log4js = require('./logger');
 const bfx = require('./bfx');
-const bucket = require('./bucket');
 const {Order} = require('bitfinex-api-node/lib/models');
 const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
 let cron = require('node-cron');
 cron.schedule('*/5 * * * * *', function () {
-  getDocument();
+  // getDocument();
 });
 
 const logger = log4js.getLogger('trades');
@@ -19,87 +18,119 @@ let long = false;
 let buy;
 let sell;
 
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+const url = 'mongodb://localhost:27017';
+const dbName = 'myproject';
+
+MongoClient.connect(url, function (err, client) {
+  assert.equal(null, err);
+  console.log("Connected successfully to server");
+
+  const db = client.db(dbName);
+
+  insertDocuments(db, function () {
+    client.close();
+  });
+  // .then(function(result) {
+  //   // process result
+  //   console.log('ayé g fini');
+  // });
+});
+
+const insertDocuments = function (db, callback) {
+  // Get the documents collection
+  const collection = db.collection('documents');
+  // Insert some documents
+  collection.insertMany([
+    {a: 1}, {a: 2}, {a: 3}
+  ], function (err, result) {
+    assert.equal(err, null);
+    assert.equal(3, result.result.n);
+    assert.equal(3, result.ops.length);
+    console.log("Inserted 3 documents into the collection");
+    callback(result);
+  });
+};
+
 const wsCandle = bfx.ws(2, {
   manageCandles: true,
   transform: true
 });
 const wsAuth = bfx.ws(2);
 
-wsCandle.on('open', () => {
-  wsCandle.subscribeCandles(CANDLE_KEY);
-});
-wsCandle.on('error', (err) => errorLogger.info(err));
-wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
-  if (init) {
-    console.log('\n' +
-      '            ____        __     ____ _____ ____       \n' +
-      '           / __ )____  / /_   / __ / ___//  _/       \n' +
-      ' ______   / __  / __ \\/ __/  / /_/ \\__ \\ / /   ______\n' +
-      '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
-      '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
-      '                                                     \n' +
-      'v1.1.1  /  ' + config.currency + '\n');
-    consoleJS.trace('Initialising Couchbase..');
-    initCouchbase(candles);
-    init = false;
-  }
-  retrieveDocumentAndUpdate(candles[0]);
-});
-wsCandle.open();
-
-wsAuth.on('open', () => {
-  console.log('open');
-  wsAuth.auth();
-});
-wsAuth.on('error', (err) => {
-  console.log('auth error', err);
-});
-wsAuth.once('auth', () => {
-  console.log('authenticated');
-
-  // Build new order
-  const o = new Order({
-    cid: Date.now(),
-    symbol: 'tBTCUSD',
-    amount: -0.0020958,
-    type: Order.type.EXCHANGE_MARKET
-  }, wsAuth);
-
-  let closed = false;
-
-  // Enable automatic updates
-  o.registerListeners();
-
-  o.on('update', () => {
-    console.log('order updated: %j', o.serialize());
-  });
-
-  o.on('close', () => {
-    console.log('order closed: %s', o.status);
-    closed = true
-  });
-
-  console.log('submitting order %d', o.cid);
-
-  o.submit().then(() => {
-    console.log('got submit confirmation for order %d [%d]', o.cid, o.id);
-
-    // wait a bit...
-    setTimeout(() => {
-      if (closed) return;
-
-      console.log('canceling...');
-
-      o.cancel().then(() => {
-        console.log('got cancel confirmation for order %d', o.cid);
-      }).catch((err) => {
-        console.log('error cancelling order: %j', err);
-      })
-    }, 2000)
-  }).catch((err) => {
-    console.log(err)
-  });
-});
+// wsCandle.on('open', () => {
+//   wsCandle.subscribeCandles(CANDLE_KEY);
+// });
+// wsCandle.on('error', (err) => errorLogger.info(err));
+// wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
+//   if (init) {
+//     console.log('\n' +
+//       '            ____        __     ____ _____ ____       \n' +
+//       '           / __ )____  / /_   / __ / ___//  _/       \n' +
+//       ' ______   / __  / __ \\/ __/  / /_/ \\__ \\ / /   ______\n' +
+//       '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
+//       '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
+//       '                                                     \n' +
+//       'v1.1.1  /  ' + config.currency + '\n');
+//     consoleJS.trace('Initialising Couchbase..');
+//     initCouchbase(candles);
+//     init = false;
+//   }
+//   retrieveDocumentAndUpdate(candles[0]);
+// });
+// // wsCandle.open();
+//
+// wsAuth.on('open', () => {
+//   wsAuth.auth();
+// });
+// wsAuth.on('error', (err) => errorLogger.info(err));
+// wsAuth.once('auth', () => {
+//   console.log('authenticated');
+//
+//   // Build new order
+//   const o = new Order({
+//     cid: Date.now(),
+//     symbol: 'tBTCUSD',
+//     amount: -0.0020958,
+//     type: Order.type.EXCHANGE_MARKET
+//   }, wsAuth);
+//
+//   let closed = false;
+//
+//   // Enable automatic updates
+//   o.registerListeners();
+//
+//   o.on('update', () => {
+//     console.log('order updated: %j', o.serialize());
+//   });
+//
+//   o.on('close', () => {
+//     console.log('order closed: %s', o.status);
+//     closed = true
+//   });
+//
+//   console.log('submitting order %d', o.cid);
+//
+//   o.submit().then(() => {
+//     console.log('got submit confirmation for order %d [%d]', o.cid, o.id);
+//
+//     // wait a bit...
+//     setTimeout(() => {
+//       if (closed) return;
+//
+//       console.log('canceling...');
+//
+//       o.cancel().then(() => {
+//         console.log('got cancel confirmation for order %d', o.cid);
+//       }).catch((err) => {
+//         console.log('error cancelling order: %j', err);
+//       })
+//     }, 2000)
+//   }).catch((err) => {
+//     console.log(err)
+//   });
+// });
 // wsAuth.open();
 
 
