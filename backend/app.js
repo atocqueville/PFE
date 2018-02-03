@@ -26,7 +26,7 @@ const wsCandle = bfx.ws(2, {
 const wsAuth = bfx.ws(2);
 
 mongoUtil.connectToServer(function (err) {
-  if (err) throw err;
+  if (err) console.log(err);
   wsCandle.on('open', () => {
     wsCandle.subscribeCandles(CANDLE_KEY);
   });

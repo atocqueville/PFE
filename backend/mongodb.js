@@ -2,7 +2,7 @@
 
 const MongoClient = require('mongodb').MongoClient;
 
-const url = 'mongodb://localhost:27017';
+const url = 'mongodb://localhost:27017/myproject';
 const dbName = 'myproject';
 let _db;
 let options = {
@@ -14,6 +14,7 @@ let options = {
 module.exports = {
   connectToServer: function (callback) {
     MongoClient.connect(url, options, function (err, client) {
+      if (err) console.log(err);
       _db = client.db(dbName);
       return callback(err);
     });
