@@ -1,3 +1,4 @@
+const packagejson = require('./package.json');
 const config = require('./config.json');
 const log4js = require('./logger');
 const bfx = require('./bfx');
@@ -38,8 +39,8 @@ mongoUtil.connectToServer(function (err) {
         ' ______   / __  / __ \\/ __/  / /_/ \\__ \\ / /   ______\n' +
         '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
         '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
-        '                                                     \n' +
-        'v2.1.0  /  ' + config.currency + '\n');
+        '                                                     \n ' +
+        packagejson.version + '  /  ' + config.currency + '\n');
       initMongoDb(candles);
       init = false;
     } else {
@@ -155,10 +156,10 @@ function initJSON(previousCandles) {
       candle.AVGGAIN = (previousAvgGain * (Number(period) - 1) + diff) / Number(period);
       candle.AVGLOSS = (previousAvgLoss * (Number(period) - 1)) / Number(period);
     } else if (diff < 0) {
-        candle.AVGGAIN = (previousAvgGain * (Number(period) - 1)) / Number(period);
+      candle.AVGGAIN = (previousAvgGain * (Number(period) - 1)) / Number(period);
       candle.AVGLOSS = (previousAvgLoss * (Number(period) - 1) + Math.abs(diff)) / Number(period);
     } else {
-        candle.AVGGAIN = (previousAvgGain * (Number(period) - 1)) / Number(period);
+      candle.AVGGAIN = (previousAvgGain * (Number(period) - 1)) / Number(period);
       candle.AVGLOSS = (previousAvgLoss * (Number(period) - 1)) / Number(period);
     }
     candle.RSI = 100 - (100 / (1 + (candle.AVGGAIN / candle.AVGLOSS)));
