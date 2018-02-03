@@ -12,3 +12,4 @@ apikeys.json
 logger.log
 response.log
 errors.log
+boot.bat
