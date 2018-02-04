@@ -11,4 +11,3 @@ npm-debug.log
 config/apikeys.json
 logs/trades.log
 logs/errors.log
-boot.bat
