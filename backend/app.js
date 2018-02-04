@@ -8,7 +8,6 @@ const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD'
 
 let cron = require('node-cron');
 let task = cron.schedule('*/5 * * * * *', function () {
-  trades.info('test22');
   getDocument();
 }, false);
 
