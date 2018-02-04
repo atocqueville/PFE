@@ -1,19 +1,16 @@
-const packagejson = require('./package.json');
-const config = require('./config.json');
-const log4js = require('./logger');
-const bfx = require('./bfx');
-const mongoUtil = require('./mongodb');
+const version = require('./package.json').version;
+const config = require('./config/config.json');
+const {trades, error, console2} = require('./lib/logger');
+const bfx = require('./lib/bfx');
+const mongoUtil = require('./lib/mongodb');
 const {Order} = require('bitfinex-api-node/lib/models');
 const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
 let cron = require('node-cron');
-cron.schedule('*/5 * * * * *', function () {
+let task = cron.schedule('*/5 * * * * *', function () {
+  trades.info('test22');
   getDocument();
-});
-
-const logger = log4js.getLogger('trades');
-const errorLogger = log4js.getLogger('error');
-const consoleJS = log4js.getLogger('');
+}, false);
 
 let init = true;
 let long = false;
@@ -30,7 +27,10 @@ mongoUtil.connectToServer(function (err) {
   wsCandle.on('open', () => {
     wsCandle.subscribeCandles(CANDLE_KEY);
   });
-  wsCandle.on('error', (err) => errorLogger.info(err));
+  wsCandle.on('error', (err) => error.info(err));
+  wsCandle.on('close', () => {
+    wsCandle.reconnect();
+  });
   wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
     if (init) {
       console.log('\n' +
@@ -40,7 +40,7 @@ mongoUtil.connectToServer(function (err) {
         '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
         '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
         '                                                     \n ' +
-        packagejson.version + '  /  ' + config.currency + '\n');
+        version + '  /  ' + config.currency + '\n');
       initMongoDb(candles);
       init = false;
     } else {
@@ -103,15 +103,17 @@ mongoUtil.connectToServer(function (err) {
 // wsAuth.open();
 
 function initMongoDb(previousCandles) {
-  consoleJS.warn('Initialisation MongoDb');
+  console2.warn('Initialisation MongoDb');
   let db = mongoUtil.getDb();
   let collection = db.collection('candles');
   collection.deleteMany(function (err, delOK) {
     if (err) throw err;
-    if (delOK) consoleJS.trace('Suppression ancienne collection');
+    if (delOK) console2.trace('Suppression ancienne collection');
     collection.insertMany(initJSON(previousCandles), function (err) {
       if (err) throw err;
-      consoleJS.trace('Creation nouvelle collection');
+      console2.trace('Creation nouvelle collection');
+      task.start();
+      console2.warn('Waiting for trades..\n');
     });
   });
 }
@@ -217,17 +219,17 @@ function getDocument() {
 function makeDecisions(lastCandle) {
   if (!long) {
     if (lastCandle.RSI <= 30) {
-      consoleJS.warn('Buy order executed');
+      console2.warn('Buy order executed');
       buy = lastCandle.CLOSE;
-      logger.info('Achat au prix de : $', buy);
+      trades.info('Achat au prix de : $', buy);
       long = true;
     }
   } else if (long) {
     if (lastCandle.RSI >= 70) {
-      consoleJS.warn('Sell order executed\n');
+      console2.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
-      logger.info('Vente au prix de : $', sell);
-      logger.trace('Variation : %', ((sell / buy) - 1) * 100);
+      trades.info('Vente au prix de : $', sell);
+      trades.trace('Variation : %', (((sell / buy) - 1) * 100).toFixed(2) + '\n');
       long = false;
     }
   }

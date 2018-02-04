@@ -8,8 +8,7 @@
 
 # misc
 npm-debug.log
-apikeys.json
-logger.log
-response.log
-errors.log
+config/apikeys.json
+logs/trades.log
+logs/errors.log
 boot.bat

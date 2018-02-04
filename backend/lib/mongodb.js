@@ -2,8 +2,8 @@
 
 const MongoClient = require('mongodb').MongoClient;
 
-const url = 'mongodb://localhost:27017/myproject';
-const dbName = 'myproject';
+const url = 'mongodb://localhost:27017/botrsi';
+const dbName = 'botrsi';
 let _db;
 let options = {
   keepAlive: 1,

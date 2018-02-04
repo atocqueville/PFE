@@ -1,6 +1,6 @@
 'use strict';
 
-let apiKeys = require('./apikeys.json');
+let apiKeys = require('../config/apikeys');
 const BFX = require('bitfinex-api-node');
 
 const bfx = new BFX({

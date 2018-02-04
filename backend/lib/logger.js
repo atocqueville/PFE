@@ -4,8 +4,8 @@ let log4js = require('log4js');
 
 log4js.configure({
   appenders: {
-    tradesLogs: {type: 'file', filename: 'logger.log'},
-    errorLogs: {type: 'file', filename: 'errors.log'},
+    tradesLogs: {type: 'file', filename: 'logs/trades.log'},
+    errorLogs: {type: 'file', filename: 'logs/errors.log'},
     console: {type: 'console'}
   },
   categories: {
@@ -15,4 +15,10 @@ log4js.configure({
   }
 });
 
-module.exports = log4js;
+const trades = log4js.getLogger('trades');
+const error = log4js.getLogger('error');
+const console2 = log4js.getLogger('');
+
+module.exports = {
+  trades, error, console2
+};
