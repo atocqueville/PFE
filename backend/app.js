@@ -15,7 +15,18 @@ let init = true;
 let long = false;
 let buy;
 let sell;
-let localCandle = {
+let derniereLocalCandle = {
+  MTS: "",
+  DATA: {
+    CLOSE: "",
+    DIFF: "",
+    AVGGAIN: "",
+    AVGLOSS: "",
+    RSI: ""
+  },
+  DATE: ""
+};
+let avantDerniereLocalCandle = {
   MTS: "",
   DATA: {
     CLOSE: "",
@@ -39,10 +50,10 @@ mongoUtil.connectToServer(function (err) {
     wsCandle.subscribeCandles(CANDLE_KEY);
   });
   wsCandle.on('error', (err) => error.info(err));
-  wsCandle.on('close', (err) => {
-    error.info(err);
-    // wsCandle.reconnect();
-  });
+  // wsCandle.on('close', (err) => {
+  //   error.info(err);
+  //   wsCandle.reconnect();
+  // });
   wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
     if (init) {
       console.log('\n' +
@@ -56,7 +67,8 @@ mongoUtil.connectToServer(function (err) {
       initMongoDb(candles);
       init = false;
     } else {
-      updateLocally(candles[0]);
+      updateCandle(candles[0]);
+      console.log(derniereLocalCandle);
     }
   });
   wsCandle.open();
@@ -177,35 +189,66 @@ function initJSON(previousCandles) {
       candle.AVGLOSS = (previousAvgLoss * (Number(period) - 1)) / Number(period);
     }
     candle.RSI = 100 - (100 / (1 + (candle.AVGGAIN / candle.AVGLOSS)));
-    localCandle.MTS = candlesJSON[i].MTS;
-    localCandle.DATE = candlesJSON[i].DATE;
-    localCandle.DATA = candle;
+
+    avantDerniereLocalCandle.MTS = derniereLocalCandle.MTS;
+    avantDerniereLocalCandle.DATA = derniereLocalCandle.DATA;
+    avantDerniereLocalCandle.DATE = derniereLocalCandle.DATE;
+
+    derniereLocalCandle.MTS = candlesJSON[i].MTS;
+    derniereLocalCandle.DATA = candle;
+    derniereLocalCandle.DATE = candlesJSON[i].DATE;
   }
-  console.log(localCandle);
   return candlesJSON;
 }
 
-function updateLocally(lastCandle) {
-  if (lastCandle.mts === localCandle.MTS) {
-    // update DATA sur localCandle
-    console.log('meme candle, different close');
+function updateLocally(lastCandle, derniereLocal) {
+  let period = config.RSIperiod;
+  derniereLocal.DATA.CLOSE = lastCandle.close;
+  derniereLocal.DATA.DIFF = derniereLocal.DATA.CLOSE - avantDerniereLocalCandle.DATA.CLOSE;
+  if (derniereLocal.DATA.DIFF > 0) {
+    derniereLocal.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1) + derniereLocal.DATA.DIFF) / Number(period);
+    derniereLocal.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1)) / Number(period);
+  } else if (derniereLocal.DATA.DIFF < 0) {
+    derniereLocal.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1)) / Number(period);
+    derniereLocal.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1) + Math.abs(derniereLocal.DATA.DIFF)) / Number(period);
   } else {
-    updateLastCandle();
-    localCandle.MTS = lastCandle.mts;
-    localCandle.DATA = {};
+    derniereLocal.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1)) / Number(period);
+    derniereLocal.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1)) / Number(period);
+  }
+  derniereLocal.DATA.RSI = 100 - (100 / (1 + (derniereLocal.DATA.AVGGAIN / derniereLocal.DATA.AVGLOSS)));
+  derniereLocal.DATE = new Date(derniereLocal.MTS).toLocaleTimeString();
+  return derniereLocal;
+}
+
+function updateCandle(lastCandle) {
+  if (lastCandle.mts === derniereLocalCandle.MTS) {
+    derniereLocalCandle = updateLocally(lastCandle, derniereLocalCandle);
+  } else {
+    updateMongoDb(lastCandle);
   }
 }
 
-function updateLastCandle() {
+function updateMongoDb(lastCandle) {
   let db = mongoUtil.getDb();
   let collection = db.collection('candles');
   let newValues = {
     $set: {
-      localCandle
+      MTS: derniereLocalCandle.MTS,
+      DATA: {
+        CLOSE: derniereLocalCandle.DATA.CLOSE,
+        DIFF: derniereLocalCandle.DATA.DIFF,
+        AVGGAIN: derniereLocalCandle.DATA.AVGGAIN,
+        AVGLOSS: derniereLocalCandle.DATA.AVGLOSS,
+        RSI: derniereLocalCandle.DATA.RSI
+      },
+      DATE: new Date(derniereLocalCandle.MTS).toLocaleTimeString()
     }
   };
-  collection.updateOne({MTS: localCandle.MTS}, newValues, {upsert: true});
-  console.log('nouvelle candle inseree');
+  collection.updateOne({MTS: derniereLocalCandle.MTS}, newValues, {upsert: true}, function () {
+    console.log('la');
+    avantDerniereLocalCandle = derniereLocalCandle;
+    derniereLocalCandle = updateLocally(lastCandle, derniereLocalCandle);
+  });
 }
 
 function getDocument() {
