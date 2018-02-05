@@ -187,48 +187,25 @@ function initJSON(previousCandles) {
 
 function updateLocally(lastCandle) {
   if (lastCandle.mts === localCandle.MTS) {
-
+    // update DATA sur localCandle
+    console.log('meme candle, different close');
   } else {
-    // updateLastCandle(lastCandle);
+    updateLastCandle();
+    localCandle.MTS = lastCandle.mts;
+    localCandle.DATA = {};
   }
 }
 
-function updateLastCandle(lastCandle) {
-  let period = config.RSIperiod;
+function updateLastCandle() {
   let db = mongoUtil.getDb();
   let collection = db.collection('candles');
-
-  collection.find({MTS: lastCandle.mts - (60000 * config.timestamp)}).toArray(function (err, res) {
-    if (err) throw err;
-    let previousCandle = res[0].DATA;
-    let DIFF = Number(lastCandle.close) - Number(previousCandle.CLOSE);
-    let AVGGAIN, AVGLOSS;
-    if (DIFF > 0) {
-      AVGGAIN = (previousCandle.AVGGAIN * (period - 1) + DIFF) / period;
-      AVGLOSS = (previousCandle.AVGLOSS * (period - 1)) / period;
-    } else if (DIFF < 0) {
-      AVGGAIN = (previousCandle.AVGGAIN * (period - 1)) / period;
-      AVGLOSS = (previousCandle.AVGLOSS * (period - 1) + Math.abs(DIFF)) / period;
-    } else {
-      AVGGAIN = (previousCandle.AVGGAIN * (period - 1)) / period;
-      AVGLOSS = (previousCandle.AVGLOSS * (period - 1)) / period;
+  let newValues = {
+    $set: {
+      localCandle
     }
-    let RSI = 100 - (100 / (1 + (AVGGAIN / AVGLOSS)));
-    let newValues = {
-      $set: {
-        MTS: lastCandle.mts,
-        DATA: {
-          CLOSE: lastCandle.close,
-          DIFF: DIFF,
-          AVGGAIN: AVGGAIN,
-          AVGLOSS: AVGLOSS,
-          RSI: RSI
-        },
-        DATE: new Date(lastCandle.mts).toLocaleTimeString()
-      }
-    };
-    collection.updateOne({MTS: lastCandle.mts}, newValues, {upsert: true});
-  });
+  };
+  collection.updateOne({MTS: localCandle.MTS}, newValues, {upsert: true});
+  console.log('nouvelle candle inseree');
 }
 
 function getDocument() {
