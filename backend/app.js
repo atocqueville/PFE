@@ -8,13 +8,25 @@ const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD'
 
 let cron = require('node-cron');
 let task = cron.schedule('*/5 * * * * *', function () {
-  getDocument();
+  // getDocument();
 }, false);
 
 let init = true;
 let long = false;
 let buy;
 let sell;
+let localCandle = {
+  MTS: "",
+  DATA: {
+    CLOSE: "",
+    DIFF: "",
+    AVGGAIN: "",
+    AVGLOSS: "",
+    RSI: ""
+  },
+  DATE: ""
+};
+
 const wsCandle = bfx.ws(2, {
   manageCandles: true,
   transform: true
@@ -27,8 +39,9 @@ mongoUtil.connectToServer(function (err) {
     wsCandle.subscribeCandles(CANDLE_KEY);
   });
   wsCandle.on('error', (err) => error.info(err));
-  wsCandle.on('close', () => {
-    wsCandle.reconnect();
+  wsCandle.on('close', (err) => {
+    error.info(err);
+    // wsCandle.reconnect();
   });
   wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
     if (init) {
@@ -43,7 +56,7 @@ mongoUtil.connectToServer(function (err) {
       initMongoDb(candles);
       init = false;
     } else {
-      updateLastCandle(candles[0]);
+      updateLocally(candles[0]);
     }
   });
   wsCandle.open();
@@ -164,8 +177,20 @@ function initJSON(previousCandles) {
       candle.AVGLOSS = (previousAvgLoss * (Number(period) - 1)) / Number(period);
     }
     candle.RSI = 100 - (100 / (1 + (candle.AVGGAIN / candle.AVGLOSS)));
+    localCandle.MTS = candlesJSON[i].MTS;
+    localCandle.DATE = candlesJSON[i].DATE;
+    localCandle.DATA = candle;
   }
+  console.log(localCandle);
   return candlesJSON;
+}
+
+function updateLocally(lastCandle) {
+  if (lastCandle.mts === localCandle.MTS) {
+
+  } else {
+    // updateLastCandle(lastCandle);
+  }
 }
 
 function updateLastCandle(lastCandle) {
