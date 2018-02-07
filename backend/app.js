@@ -8,7 +8,7 @@ const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD'
 
 let cron = require('node-cron');
 let task = cron.schedule('*/5 * * * * *', function () {
-  // getDocument();
+  makeDecisions(derniereLocalCandle.DATA);
 }, false);
 
 let init = true;
@@ -44,8 +44,8 @@ const wsCandle = bfx.ws(2, {
 });
 const wsAuth = bfx.ws(2);
 
-mongoUtil.connectToServer(function (err) {
-  if (err) console.log(err);
+// mongoUtil.connectToServer(function (err) {
+//   if (err) console.log(err);
   wsCandle.on('open', () => {
     wsCandle.subscribeCandles(CANDLE_KEY);
   });
@@ -68,11 +68,10 @@ mongoUtil.connectToServer(function (err) {
       init = false;
     } else {
       updateCandle(candles[0]);
-      console.log(derniereLocalCandle);
     }
   });
   wsCandle.open();
-});
+// });
 
 // wsAuth.on('open', () => {
 //   wsAuth.auth();
@@ -127,19 +126,21 @@ mongoUtil.connectToServer(function (err) {
 // wsAuth.open();
 
 function initMongoDb(previousCandles) {
-  console2.warn('Initialisation MongoDb');
-  let db = mongoUtil.getDb();
-  let collection = db.collection('candles');
-  collection.deleteMany(function (err, delOK) {
-    if (err) throw err;
-    if (delOK) console2.trace('Suppression ancienne collection');
-    collection.insertMany(initJSON(previousCandles), function (err) {
-      if (err) throw err;
-      console2.trace('Creation nouvelle collection');
-      task.start();
-      console2.warn('Waiting for trades..\n');
-    });
-  });
+  initJSON(previousCandles);
+  task.start();
+  // console2.warn('Initialisation MongoDb');
+  // let db = mongoUtil.getDb();
+  // let collection = db.collection('candles');
+  // collection.deleteMany(function (err, delOK) {
+  //   if (err) throw err;
+  //   if (delOK) console2.trace('Suppression ancienne collection');
+  //   collection.insertMany(initJSON(previousCandles), function (err) {
+  //     if (err) throw err;
+  //     console2.trace('Creation nouvelle collection');
+  //     task.start();
+  //     console2.warn('Waiting for trades..\n');
+  //   });
+  // });
 }
 
 function initJSON(previousCandles) {
@@ -201,31 +202,37 @@ function initJSON(previousCandles) {
   return candlesJSON;
 }
 
-function updateLocally(lastCandle, derniereLocal) {
+function updateLocally(lastCandle) {
   let period = config.RSIperiod;
-  derniereLocal.DATA.CLOSE = lastCandle.close;
-  derniereLocal.DATA.DIFF = derniereLocal.DATA.CLOSE - avantDerniereLocalCandle.DATA.CLOSE;
-  if (derniereLocal.DATA.DIFF > 0) {
-    derniereLocal.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1) + derniereLocal.DATA.DIFF) / Number(period);
-    derniereLocal.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1)) / Number(period);
-  } else if (derniereLocal.DATA.DIFF < 0) {
-    derniereLocal.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1)) / Number(period);
-    derniereLocal.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1) + Math.abs(derniereLocal.DATA.DIFF)) / Number(period);
+  derniereLocalCandle.MTS = lastCandle.mts;
+  derniereLocalCandle.DATA.CLOSE = lastCandle.close;
+  derniereLocalCandle.DATA.DIFF = derniereLocalCandle.DATA.CLOSE - avantDerniereLocalCandle.DATA.CLOSE;
+  if (derniereLocalCandle.DATA.DIFF > 0) {
+    derniereLocalCandle.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1) + derniereLocalCandle.DATA.DIFF) / Number(period);
+    derniereLocalCandle.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1)) / Number(period);
+  } else if (derniereLocalCandle.DATA.DIFF < 0) {
+    derniereLocalCandle.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1)) / Number(period);
+    derniereLocalCandle.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1) + Math.abs(derniereLocalCandle.DATA.DIFF)) / Number(period);
   } else {
-    derniereLocal.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1)) / Number(period);
-    derniereLocal.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1)) / Number(period);
+    derniereLocalCandle.DATA.AVGGAIN = (avantDerniereLocalCandle.DATA.AVGGAIN * (Number(period) - 1)) / Number(period);
+    derniereLocalCandle.DATA.AVGLOSS = (avantDerniereLocalCandle.DATA.AVGLOSS * (Number(period) - 1)) / Number(period);
   }
-  derniereLocal.DATA.RSI = 100 - (100 / (1 + (derniereLocal.DATA.AVGGAIN / derniereLocal.DATA.AVGLOSS)));
-  derniereLocal.DATE = new Date(derniereLocal.MTS).toLocaleTimeString();
-  return derniereLocal;
+  derniereLocalCandle.DATA.RSI = 100 - (100 / (1 + (derniereLocalCandle.DATA.AVGGAIN / derniereLocalCandle.DATA.AVGLOSS)));
+  derniereLocalCandle.DATE = new Date(derniereLocalCandle.MTS).toLocaleTimeString();
 }
 
 function updateCandle(lastCandle) {
-  if (lastCandle.mts === derniereLocalCandle.MTS) {
-    derniereLocalCandle = updateLocally(lastCandle, derniereLocalCandle);
-  } else {
-    updateMongoDb(lastCandle);
+  if (lastCandle.mts !== derniereLocalCandle.MTS) {
+    // updateMongoDb(lastCandle);
+    avantDerniereLocalCandle.MTS = derniereLocalCandle.MTS;
+    avantDerniereLocalCandle.DATA.CLOSE = derniereLocalCandle.DATA.CLOSE;
+    avantDerniereLocalCandle.DATA.DIFF = derniereLocalCandle.DATA.DIFF;
+    avantDerniereLocalCandle.DATA.AVGGAIN = derniereLocalCandle.DATA.AVGGAIN;
+    avantDerniereLocalCandle.DATA.AVGLOSS = derniereLocalCandle.DATA.AVGLOSS;
+    avantDerniereLocalCandle.DATA.RSI = derniereLocalCandle.DATA.RSI;
+    avantDerniereLocalCandle.DATE = derniereLocalCandle.DATE;
   }
+  updateLocally(lastCandle);
 }
 
 function updateMongoDb(lastCandle) {

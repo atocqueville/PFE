@@ -1,6 +1,6 @@
 {
   "name": "PFE",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Trading Bot using bitfinex API",
   "main": "index.js",
   "scripts": {
