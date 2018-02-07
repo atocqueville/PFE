@@ -8,11 +8,13 @@ const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD'
 
 let cron = require('node-cron');
 let task = cron.schedule('*/5 * * * * *', function () {
+  console.log(derniereLocalCandle.DATA.RSI);
+  console.log(position);
   makeDecisions(derniereLocalCandle.DATA);
 }, false);
 
 let init = true;
-let long = false;
+let position = false;
 let buy;
 let sell;
 let derniereLocalCandle = {
@@ -44,16 +46,12 @@ const wsCandle = bfx.ws(2, {
 });
 const wsAuth = bfx.ws(2);
 
-// mongoUtil.connectToServer(function (err) {
-//   if (err) console.log(err);
+mongoUtil.connectToServer(function (err) {
+  if (err) console.log(err);
   wsCandle.on('open', () => {
     wsCandle.subscribeCandles(CANDLE_KEY);
   });
   wsCandle.on('error', (err) => error.info(err));
-  // wsCandle.on('close', (err) => {
-  //   error.info(err);
-  //   wsCandle.reconnect();
-  // });
   wsCandle.onCandle({key: CANDLE_KEY}, (candles) => {
     if (init) {
       console.log('\n' +
@@ -63,7 +61,8 @@ const wsAuth = bfx.ws(2);
         '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
         '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
         '                                                     \n ' +
-        version + '  /  ' + config.currency + '\n');
+        version + '  /  ' + config.currency + '  /  ' +
+        config.timestamp + 'mn' + '  /  RSI ' + config.RSIperiod + '\n');
       initMongoDb(candles);
       init = false;
     } else {
@@ -71,7 +70,7 @@ const wsAuth = bfx.ws(2);
     }
   });
   wsCandle.open();
-// });
+});
 
 // wsAuth.on('open', () => {
 //   wsAuth.auth();
@@ -126,21 +125,19 @@ const wsAuth = bfx.ws(2);
 // wsAuth.open();
 
 function initMongoDb(previousCandles) {
-  initJSON(previousCandles);
-  task.start();
-  // console2.warn('Initialisation MongoDb');
-  // let db = mongoUtil.getDb();
-  // let collection = db.collection('candles');
-  // collection.deleteMany(function (err, delOK) {
-  //   if (err) throw err;
-  //   if (delOK) console2.trace('Suppression ancienne collection');
-  //   collection.insertMany(initJSON(previousCandles), function (err) {
-  //     if (err) throw err;
-  //     console2.trace('Creation nouvelle collection');
-  //     task.start();
-  //     console2.warn('Waiting for trades..\n');
-  //   });
-  // });
+  console2.warn('Initialisation MongoDb');
+  let db = mongoUtil.getDb();
+  let collection = db.collection('candles');
+  collection.deleteMany(function (err, delOK) {
+    if (err) throw err;
+    if (delOK) console2.trace('Suppression ancienne collection');
+    collection.insertMany(initJSON(previousCandles), function (err) {
+      if (err) throw err;
+      console2.trace('Creation nouvelle collection');
+      task.start();
+      console2.warn('Waiting for trades..\n');
+    });
+  });
 }
 
 function initJSON(previousCandles) {
@@ -202,7 +199,7 @@ function initJSON(previousCandles) {
   return candlesJSON;
 }
 
-function updateLocally(lastCandle) {
+function updateLocalLastCandle(lastCandle) {
   let period = config.RSIperiod;
   derniereLocalCandle.MTS = lastCandle.mts;
   derniereLocalCandle.DATA.CLOSE = lastCandle.close;
@@ -223,7 +220,7 @@ function updateLocally(lastCandle) {
 
 function updateCandle(lastCandle) {
   if (lastCandle.mts !== derniereLocalCandle.MTS) {
-    // updateMongoDb(lastCandle);
+    updateMongoDb();
     avantDerniereLocalCandle.MTS = derniereLocalCandle.MTS;
     avantDerniereLocalCandle.DATA.CLOSE = derniereLocalCandle.DATA.CLOSE;
     avantDerniereLocalCandle.DATA.DIFF = derniereLocalCandle.DATA.DIFF;
@@ -232,10 +229,10 @@ function updateCandle(lastCandle) {
     avantDerniereLocalCandle.DATA.RSI = derniereLocalCandle.DATA.RSI;
     avantDerniereLocalCandle.DATE = derniereLocalCandle.DATE;
   }
-  updateLocally(lastCandle);
+  updateLocalLastCandle(lastCandle);
 }
 
-function updateMongoDb(lastCandle) {
+function updateMongoDb() {
   let db = mongoUtil.getDb();
   let collection = db.collection('candles');
   let newValues = {
@@ -251,37 +248,24 @@ function updateMongoDb(lastCandle) {
       DATE: new Date(derniereLocalCandle.MTS).toLocaleTimeString()
     }
   };
-  collection.updateOne({MTS: derniereLocalCandle.MTS}, newValues, {upsert: true}, function () {
-    console.log('la');
-    avantDerniereLocalCandle = derniereLocalCandle;
-    derniereLocalCandle = updateLocally(lastCandle, derniereLocalCandle);
-  });
-}
-
-function getDocument() {
-  let db = mongoUtil.getDb();
-  let collection = db.collection('candles');
-  collection.find().sort({"MTS": -1}).limit(1).toArray(function (err, res) {
-    if (err) throw err;
-    makeDecisions(res[0].DATA)
-  });
+  collection.updateOne({MTS: derniereLocalCandle.MTS}, newValues, {upsert: true});
 }
 
 function makeDecisions(lastCandle) {
-  if (!long) {
+  if (!position) {
     if (lastCandle.RSI <= 30) {
       console2.warn('Buy order executed');
       buy = lastCandle.CLOSE;
       trades.info('Achat au prix de : $', buy);
-      long = true;
+      position = true;
     }
-  } else if (long) {
+  } else if (position) {
     if (lastCandle.RSI >= 70) {
       console2.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
       trades.info('Vente au prix de : $', sell);
       trades.trace('Variation : %', (((sell / buy) - 1) * 100).toFixed(2) + '\n');
-      long = false;
+      position = false;
     }
   }
 }
