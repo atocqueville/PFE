@@ -21,6 +21,7 @@
     "bitfinex-api-node": "^2.0.0-beta",
     "log4js": "^2.5.2",
     "mongodb": "^3.0.2",
-    "node-cron": "^1.2.1"
+    "node-cron": "^1.2.1",
+    "twilio": "^3.11.2"
   }
 }

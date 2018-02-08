@@ -3,13 +3,12 @@ const config = require('./config/config.json');
 const {trades, error, console2} = require('./lib/logger');
 const bfx = require('./lib/bfx');
 const mongoUtil = require('./lib/mongodb');
+const clientTel = require('./lib/twilio');
 const {Order} = require('bitfinex-api-node/lib/models');
 const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
 let cron = require('node-cron');
 let task = cron.schedule('*/5 * * * * *', function () {
-  console.log(derniereLocalCandle.DATA.RSI);
-  console.log(position);
   makeDecisions(derniereLocalCandle.DATA);
 }, false);
 
@@ -17,6 +16,7 @@ let init = true;
 let position = false;
 let buy;
 let sell;
+let message;
 let derniereLocalCandle = {
   MTS: "",
   DATA: {
@@ -253,18 +253,24 @@ function updateMongoDb() {
 
 function makeDecisions(lastCandle) {
   if (!position) {
-    if (lastCandle.RSI <= 30) {
+    if (lastCandle.RSI > 30) {
       console2.warn('Buy order executed');
       buy = lastCandle.CLOSE;
       trades.info('Achat au prix de : $', buy);
+      message = 'Achat au prix de : $' + buy;
+      // clientTel.sendSMS(message);
       position = true;
     }
   } else if (position) {
-    if (lastCandle.RSI >= 70) {
+    if (lastCandle.RSI < 70) {
       console2.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
+      message = 'Vente au prix de : $' + sell;
+      // clientTel.sendSMS(message);
       trades.info('Vente au prix de : $', sell);
       trades.trace('Variation : %', (((sell / buy) - 1) * 100).toFixed(2) + '\n');
+      message = 'Variation : ' + (((sell / buy) - 1) * 100).toFixed(2) + '%';
+      // clientTel.sendSMS(message);
       position = false;
     }
   }
