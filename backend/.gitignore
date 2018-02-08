@@ -9,5 +9,6 @@
 # misc
 npm-debug.log
 config/apikeys.json
+config/twilio.json
 logs/trades.log
 logs/errors.log
