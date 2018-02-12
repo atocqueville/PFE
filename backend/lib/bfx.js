@@ -7,11 +7,10 @@ const bfx = new BFX({
   apiKey: apiKeys.public,
   apiSecret: apiKeys.private,
   ws: {
-    autoReconnect: true,
+    autoReconnect: false,
     seqAudit: true,
     packetWDDelay: 10 * 1000
   }
 });
-// Error: unexpected server response (525)
 
 module.exports = bfx;
