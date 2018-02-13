@@ -14,4 +14,6 @@ function sendSMS(content) {
   });
 }
 
-module.exports.sendSMS = sendSMS;
+module.exports = {
+  sendSMS
+};

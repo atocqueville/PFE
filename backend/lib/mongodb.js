@@ -7,8 +7,8 @@ const dbName = 'botrsi';
 let _db;
 let options = {
   keepAlive: 1,
-  socketTimeoutMS: 60000,
-  connectTimeoutMS: 60000
+  socketTimeoutMS: 10000,
+  connectTimeoutMS: 10000
 };
 
 module.exports = {

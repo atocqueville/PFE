@@ -23,5 +23,8 @@ const response = log4js.getLogger('response');
 const console2 = log4js.getLogger('');
 
 module.exports = {
-  trades, error, response, console2
+  trades,
+  error,
+  response,
+  console2
 };
