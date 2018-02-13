@@ -3,34 +3,16 @@ const mongoUtil = require('../lib/mongodb');
 const cron = require('node-cron');
 const clientTel = require('../lib/twilio');
 const {trades, error, console2} = require('../lib/logger');
-
-let derniereLocalCandle = {
-  MTS: "",
-  DATA: {
-    CLOSE: "",
-    DIFF: "",
-    AVGGAIN: "",
-    AVGLOSS: "",
-    RSI: ""
-  },
-  DATE: ""
-};
-let avantDerniereLocalCandle = {
-  MTS: "",
-  DATA: {
-    CLOSE: "",
-    DIFF: "",
-    AVGGAIN: "",
-    AVGLOSS: "",
-    RSI: ""
-  },
-  DATE: ""
-};
-let buy, sell, message, position = false;
+let Candle = require('../models/candle');
 
 let task = cron.schedule('*/5 * * * * *', function () {
   makeDecisions(derniereLocalCandle.DATA);
+  console.log(derniereLocalCandle.DATA.RSI);
 }, false);
+
+let derniereLocalCandle = new Candle();
+let avantDerniereLocalCandle = new Candle();
+let buy, sell, message, position = false;
 
 function makeDecisions(lastCandle) {
   if (!position) {

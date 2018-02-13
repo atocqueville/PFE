@@ -5,8 +5,7 @@ const config = require('../config/config');
 const services = require('../lib/services');
 const {error, console2} = require('../lib/logger');
 const version = require('../package').version;
-const url = 'wss://api.bitfinex.com/ws/2/';
-const CANDLE_KEY = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
+const candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
 let lastBuyOrderId;
 let lastSellOrderId;
@@ -16,10 +15,10 @@ function wsConnection() {
   const payload = {
     event: 'subscribe',
     channel: 'candles',
-    key: CANDLE_KEY
+    key: candleKey
   };
-  const ws = new WebSocket(url);
 
+  const ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
   ws.on('open', () => {
     console.log('\n' +
       '            ____        __     ____ _____ ____       \n' +
