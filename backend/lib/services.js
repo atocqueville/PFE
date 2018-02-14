@@ -36,7 +36,6 @@ function makeDecisions(lastCandle) {
 function initCandleStack(previousCandles) {
   initJSON(previousCandles);
   task.start();
-  console2.warn('Waiting for trades..\n');
   // console2.warn('Initialisation MongoDb');
   // let db = mongoUtil.getDb();
   // let collection = db.collection('candles');

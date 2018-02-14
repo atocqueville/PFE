@@ -3,8 +3,8 @@ const WebSocket = require('ws');
 const apiKeys = require('../config/apikeys');
 const config = require('../config/config');
 const services = require('../lib/services');
-const {error, console2} = require('../lib/logger');
-const version = require('../package').version;
+const {error} = require('../lib/logger');
+
 const candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 
 let lastBuyOrderId;
@@ -20,17 +20,7 @@ function wsConnection() {
 
   const ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
   ws.on('open', () => {
-    console.log('\n' +
-      '            ____        __     ____ _____ ____       \n' +
-      '           / __ )____  / /_   / __ / ___//  _/       \n' +
-      ' ______   / __  / __ \\/ __/  / /_/ \\__ \\ / /   ______\n' +
-      '/_____/  / /_/ / /_/ / /_   / _, ____/ _/ /   /_____/\n' +
-      '        /_____/\\____/\\__/  /_/ |_/____/___/          \n' +
-      '                                                     \n ' +
-      version + '  /  ' + config.currency + '  /  ' +
-      config.timestamp + 'mn' + '  /  RSI ' + config.RSIperiod + '\n');
     ws.send(JSON.stringify(payload));
-    console2.info('Connection established with Bitfinex API');
   });
   ws.on('message', (res) => {
     let msg = JSON.parse(res);
