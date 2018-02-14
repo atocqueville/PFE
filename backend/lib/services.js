@@ -7,12 +7,11 @@ let Candle = require('../models/candle');
 
 let task = cron.schedule('*/5 * * * * *', function () {
   makeDecisions(derniereLocalCandle.DATA);
-  // console.log(derniereLocalCandle.DATA.RSI);
 }, false);
 
 let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
-let buy, sell, message, position = false;
+let buy, sell, position = false;
 
 function makeDecisions(lastCandle) {
   if (!position) {
@@ -20,20 +19,15 @@ function makeDecisions(lastCandle) {
       console2.warn('Buy order executed');
       buy = lastCandle.CLOSE;
       trades.info('Achat au prix de : $', buy);
-      message = 'Achat au prix de : $' + buy;
-      clientTel.sendSMS(message);
       position = true;
     }
   } else if (position) {
     if (lastCandle.RSI > 70) {
       console2.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
-      message = 'Vente au prix de : $' + sell;
-      clientTel.sendSMS(message);
-      trades.info('Vente au prix de : $', sell);
-      trades.trace('Variation : %', (((sell / buy) - 1) * 100).toFixed(2) + '\n');
-      message = 'Variation : ' + (((sell / buy) - 1) * 100).toFixed(2) + '%';
-      clientTel.sendSMS(message);
+      trades.info('Vente au prix de: $', sell);
+      trades.trace('Variation après fees: %', ((((sell / buy) - 1) * 100).toFixed(2) - 0.4) + '\n');
+      clientTel.sendSMS(buy, sell);
       position = false;
     }
   }
