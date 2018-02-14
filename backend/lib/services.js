@@ -40,19 +40,22 @@ function makeDecisions(lastCandle) {
 }
 
 function initCandleStack(previousCandles) {
-  console2.warn('Initialisation MongoDb');
-  let db = mongoUtil.getDb();
-  let collection = db.collection('candles');
-  collection.deleteMany(function (err, delOK) {
-    if (err) throw err;
-    if (delOK) console2.trace('Suppression ancienne collection');
-    collection.insertMany(initJSON(previousCandles), function (err) {
-      if (err) throw err;
-      console2.trace('Creation nouvelle collection');
-      task.start();
-      console2.warn('Waiting for trades..\n');
-    });
-  });
+  initJSON(previousCandles);
+  task.start();
+  console2.warn('Waiting for trades..\n');
+  // console2.warn('Initialisation MongoDb');
+  // let db = mongoUtil.getDb();
+  // let collection = db.collection('candles');
+  // collection.deleteMany(function (err, delOK) {
+  //   if (err) throw err;
+  //   if (delOK) console2.trace('Suppression ancienne collection');
+  //   collection.insertMany(initJSON(previousCandles), function (err) {
+  //     if (err) throw err;
+  //     console2.trace('Creation nouvelle collection');
+  //     task.start();
+  //     console2.warn('Waiting for trades..\n');
+  //   });
+  // });
 }
 
 function initJSON(previousCandles) {
@@ -115,7 +118,7 @@ function initJSON(previousCandles) {
 
 function manageCandle(lastCandle) {
   if (lastCandle[0] > derniereLocalCandle.MTS) {
-    updateMongoDb();
+    // updateMongoDb();
     avantDerniereLocalCandle.MTS = derniereLocalCandle.MTS;
     avantDerniereLocalCandle.DATA.CLOSE = derniereLocalCandle.DATA.CLOSE;
     avantDerniereLocalCandle.DATA.DIFF = derniereLocalCandle.DATA.DIFF;
