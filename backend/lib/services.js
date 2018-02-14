@@ -7,7 +7,7 @@ let Candle = require('../models/candle');
 
 let task = cron.schedule('*/5 * * * * *', function () {
   makeDecisions(derniereLocalCandle.DATA);
-  console.log(derniereLocalCandle.DATA.RSI);
+  // console.log(derniereLocalCandle.DATA.RSI);
 }, false);
 
 let derniereLocalCandle = new Candle();
