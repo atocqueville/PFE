@@ -7,9 +7,9 @@ let authToken = config.authToken;
 let client = new twilio(accountSid, authToken);
 
 function sendSMS(buy, sell) {
-  let message = '\nAchat au prix de: $' + buy + '\n' +
+  let message = 'Achat au prix de: $' + buy + '\n' +
     'Vente au prix de: $' + sell + '\n' +
-    'Variation après fees: %' + ((((sell / buy) - 1) * 100).toFixed(2) - 0.4);
+    'Variation après fees: %' + ((((sell / buy) - 1) * 100) - 0.4).toFixed(2);
   client.messages.create({
     body: message,
     to: config.to,
