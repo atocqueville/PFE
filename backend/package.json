@@ -19,7 +19,6 @@
   "homepage": "https://github.com/atocqueville/PFE#readme",
   "dependencies": {
     "crypto-js": "^3.1.9-1",
-    "forever": "^0.15.3",
     "log4js": "^2.5.2",
     "mongodb": "^3.0.2",
     "node-cron": "^1.2.1",
