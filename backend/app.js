@@ -1,13 +1,14 @@
 const mongoUtil = require('./lib/mongodb');
-const wsBitfinex = require('./lib/wsBitfinex');
+const wsBitfinex = require('./lib/wsPublic');
 const version = require('./package').version;
 const config = require('./config/config');
 const {console2} = require('./lib/logger');
 
+
 // mongoUtil.connectToServer(function (err) {
 //   if (err) error.info('[Mongo] - ' + err);
-initConsole();
-wsBitfinex.wsConnection();
+// initConsole();
+// wsBitfinex.wsConnection();
 // });
 
 function initConsole() {
