@@ -1,42 +1,118 @@
+const WebSocket = require('ws');
+const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
-const WSv2 = require("bitfinex-api-node").WSv2;
-const {error, trades} = require('../lib/logger');
-const Order = require('bitfinex-api-node').Models.Order;
-const symbol = require('../config/config').currency;
+const {error, trades} = require('./logger');
+const config = require('../config/config');
+const services = require('./services');
 
-function wsAuthConnection(price, position) {
-  let wSv2 = new WSv2({
-    apiKey: apiKeys.public,
-    apiSecret: apiKeys.private,
-    transform: true,
+let apiKey = apiKeys.public;
+let walletUSD, walletCrypto;
+let webSocket;
+
+function wsAuthConnection() {
+  const authNonce = Date.now() * 1000;
+  const authPayload = 'AUTH' + authNonce;
+  const authSig = Crypto
+    .HmacSHA384(authPayload, apiKeys.private)
+    .toString(Crypto.enc.Hex);
+  const payload = {
+    apiKey,
+    authSig,
+    authNonce,
+    authPayload,
+    event: 'auth',
+    filter: ['wallet', 'trading']
+  };
+  webSocket = new WebSocket('wss://api.bitfinex.com/ws/2/');
+  const ws = webSocket;
+
+  ws.on('open', () => ws.send(JSON.stringify(payload)));
+  ws.on('message', (message) => {
+    const msg = JSON.parse(message);
+    if (msg.event === "auth" && msg.status === "OK") {
+      console.log('[Account Connected]');
+    } else if (msg.event === "auth" && msg.status === "FAILED") {
+      console.log('[Account Failed]');
+    }
+    if (msg[1] === 'ws') {
+      console.log(msg[2]);
+    }
+    if (msg[1] === 'ws') {
+      msg[2].forEach((wallet) => {
+        if (wallet[0] === 'exchange' && wallet[1] === config.currency) walletCrypto = wallet[2];
+        if (wallet[0] === 'exchange' && wallet[1] === 'USD') walletUSD = wallet[2];
+      });
+      services.initBot(walletUSD, walletCrypto);
+    }
+    // } else if (msg[1] === 'wu') {
+    //   //for(let i = 0; i < msg[2].length; i++)
+    //   console.log('... ', msg[2]);
+    //   const wallet = msg[2];
+    //   if (wallet != null) {
+    //     if (wallet[0] === 'exchange') {
+    //       if (wallet[1] === Env.cryptoSimplSymbol) {
+    //         if (wallet[4] != null) {
+    //           Env.cryptoWallet = wallet[4];
+    //           console.log('[CRYPTO UPDATE] => ', Env.cryptoWallet);
+    //           Log.print(Env.logFileName, '[CRYPTO UPDATE] => ' + Env.cryptoWallet);
+    //         } else {
+    //           Env.cryptoWallet = wallet[2];
+    //           console.log('[CRYPTO UPDATE] => ', Env.cryptoWallet);
+    //           Log.print(Env.logFileName, '[CRYPTO UPDATE] => ' + Env.cryptoWallet);
+    //         }
+    //       } else if (wallet[1] === 'USD') {
+    //         if (wallet[4] != null) {
+    //           Env.usdWallet = wallet[4];
+    //           console.log('[USD UPDATE] => ', Env.usdWallet);
+    //           Log.print(Env.logFileName, '[USD UPDATE] => ' + Env.usdWallet);
+    //         } else {
+    //           Env.usdWallet = wallet[2];
+    //           console.log('[USD UPDATE] => ', Env.usdWallet);
+    //           Log.print(Env.logFileName, '[USD UPDATE] => ' + Env.usdWallet);
+    //         }
+    //       }
+    //     }
+    //   }
+    // } else if (msg[1] === 'os') {
+    //   console.log(msg);
+    //   msg[2].forEach(order => {
+    //     if (order[6] > 0) {
+    //       this.lastBuyOrderId = order[1];
+    //     } else if (order[6] < 0) {
+    //       this.lastSellOrderId = order[1];
+    //     }
+    //   })
+    // }
   });
-  wSv2.on('open', () => wSv2.auth());
-  wSv2.on('error', (err) => error.info(err));
-  wSv2.once('auth', () => {
-    const o = new Order({
+
+  ws.on('close', (res) => {
+    error.info('[CLOSED] - ' + res);
+    setTimeout(() => wsAuthConnection(), 1000);
+  });
+
+  ws.on('error', (err) => {
+    error.info('[ERROR] - ' + err);
+  });
+}
+
+function buy() {
+  const order = JSON.stringify([
+    0,
+    'on',
+    null,
+    {
       cid: Date.now(),
-      symbol: 't' + symbol + 'USD',
-      amount: position ? 0.3 : -0.3,
-      price: price,
-      type: Order.type.EXCHANGE_LIMIT
-    }, wSv2);
-    let closed = false;
-    o.registerListeners();
-    o.on('close', () => {
-      closed = true;
-    });
-    o.submit().then(() => {
-      trades.info(`submitted order ${o.id}`);
-      console.log(o.getLastFillAmount());
-      // wSv2.close();
-    }).catch((err) => {
-      error.info(err);
-      wSv2.close();
-    })
-  });
-  wSv2.open();
+      type: 'EXCHANGE MARKET',
+      symbol: 'NEO',
+      amount: '0.25',
+      hidden: 0,
+    }
+  ]);
+  console.log(order);
+  webSocket.send(order);
 }
 
 module.exports = {
-  wsAuthConnection: wsAuthConnection
+  wsAuthConnection: wsAuthConnection,
+  buy: buy
 };
