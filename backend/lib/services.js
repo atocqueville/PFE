@@ -1,8 +1,9 @@
+const cron = require('node-cron');
 const period = require('../config/config').RSIperiod;
 const mongoUtil = require('../lib/mongodb');
-const cron = require('node-cron');
 const clientTel = require('../lib/twilio');
 const {trades, console2} = require('../lib/logger');
+const wsAuth = require('../lib/wsAuth');
 let Candle = require('../models/candle');
 
 let task = cron.schedule('*/5 * * * * *', function () {
@@ -16,6 +17,7 @@ let buy, sell, position = false;
 function makeDecisions(lastCandle) {
   if (!position) {
     if (lastCandle.RSI < 30) {
+      wsAuth.wsAuthConnection(true);
       console2.warn('Buy order executed');
       buy = lastCandle.CLOSE;
       trades.info('Achat au prix de : $', buy);
@@ -23,6 +25,7 @@ function makeDecisions(lastCandle) {
     }
   } else if (position) {
     if (lastCandle.RSI > 70) {
+      wsAuth.wsAuthConnection(false);
       console2.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
       trades.info('Vente au prix de: $', sell);

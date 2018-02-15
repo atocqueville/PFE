@@ -1,17 +1,12 @@
-const Crypto = require('crypto-js');
 const WebSocket = require('ws');
-const apiKeys = require('../config/apikeys');
 const config = require('../config/config');
 const services = require('../lib/services');
 const {error} = require('../lib/logger');
 
 const candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
-
-let lastBuyOrderId;
-let lastSellOrderId;
 let channelID;
 
-function wsConnection() {
+function wsPublicConnection() {
   const payload = {
     event: 'subscribe',
     channel: 'candles',
@@ -36,7 +31,7 @@ function wsConnection() {
   });
   ws.on('close', (res) => {
     error.info('[CLOSED] - ' + res);
-    setTimeout(() => wsConnection(), 1000);
+    setTimeout(() => wsPublicConnection(), 1000);
   });
   ws.on('error', (err) => {
     error.warn('[ERROR] - ' + err);
@@ -44,5 +39,5 @@ function wsConnection() {
 }
 
 module.exports = {
-  wsConnection
+  wsPublicConnection: wsPublicConnection
 };
