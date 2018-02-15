@@ -55,6 +55,7 @@ function initCandleStack(previousCandles) {
 }
 
 function initJSON(previousCandles) {
+  wsAuth.wsAuthConnection(true);
   previousCandles.reverse();
   let candlesJSON = [];
 
