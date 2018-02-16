@@ -15,5 +15,4 @@ wsAuth.wsAuthConnection();
 function initConsole() {
   console.log(version + '  /  ' + config.currency + '  /  ' + config.timestamp +
     'mn' + '  /  RSI ' + config.RSIperiod + '\n');
-  console2.warn('Waiting for trades..\n');
 }

@@ -42,20 +42,17 @@ function updateWallet(usd, crypto, init) {
   walletCrypto = crypto;
   position = !!walletCrypto;
   if (init) task.start();
+  // TODO: SI START CRYPTO, RECUP DERNIEER BUY
 }
 
 function initCandleStack(previousCandles) {
   initJSON(previousCandles);
-  // console2.warn('Initialisation MongoDb');
   // let db = mongoUtil.getDb();
   // let collection = db.collection('candles');
   // collection.deleteMany(function (err, delOK) {
   //   if (err) throw err;
-  //   if (delOK) console2.trace('Suppression ancienne collection');
   //   collection.insertMany(initJSON(previousCandles), function (err) {
   //     if (err) throw err;
-  //     console2.trace('Creation nouvelle collection');
-  //     console2.warn('Waiting for trades..\n');
   //   });
   // });
 }
