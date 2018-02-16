@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
-const {error, trades} = require('./logger');
+const {error} = require('./logger');
 const config = require('../config/config');
 const services = require('./services');
 
@@ -29,50 +29,20 @@ function wsAuthConnection() {
   ws.on('open', () => ws.send(JSON.stringify(payload)));
   ws.on('message', (message) => {
     const msg = JSON.parse(message);
-    if (msg.event === "auth" && msg.status === "OK") {
-      console.log('[Account Connected]');
-    } else if (msg.event === "auth" && msg.status === "FAILED") {
-      console.log('[Account Failed]');
-    }
-    if (msg[1] === 'ws') {
-      console.log(msg[2]);
-    }
     if (msg[1] === 'ws') {
       msg[2].forEach((wallet) => {
         if (wallet[0] === 'exchange' && wallet[1] === config.currency) walletCrypto = wallet[2];
         if (wallet[0] === 'exchange' && wallet[1] === 'USD') walletUSD = wallet[2];
       });
-      services.initWallet(walletUSD, walletCrypto);
+      services.updateWallet(walletUSD, walletCrypto, true);
+    } else if (msg[1] === 'wu') {
+      if (msg[2][0] === 'exchange' && msg[2][1] === 'USD') {
+        walletUSD = msg[2][2];
+      } else if (msg[2][0] === 'exchange' && msg[2][1] === config.currency) {
+        walletCrypto = msg[2][2];
+      }
+      services.updateWallet(walletUSD, walletCrypto, false);
     }
-    // } else if (msg[1] === 'wu') {
-    //   //for(let i = 0; i < msg[2].length; i++)
-    //   console.log('... ', msg[2]);
-    //   const wallet = msg[2];
-    //   if (wallet != null) {
-    //     if (wallet[0] === 'exchange') {
-    //       if (wallet[1] === Env.cryptoSimplSymbol) {
-    //         if (wallet[4] != null) {
-    //           Env.cryptoWallet = wallet[4];
-    //           console.log('[CRYPTO UPDATE] => ', Env.cryptoWallet);
-    //           Log.print(Env.logFileName, '[CRYPTO UPDATE] => ' + Env.cryptoWallet);
-    //         } else {
-    //           Env.cryptoWallet = wallet[2];
-    //           console.log('[CRYPTO UPDATE] => ', Env.cryptoWallet);
-    //           Log.print(Env.logFileName, '[CRYPTO UPDATE] => ' + Env.cryptoWallet);
-    //         }
-    //       } else if (wallet[1] === 'USD') {
-    //         if (wallet[4] != null) {
-    //           Env.usdWallet = wallet[4];
-    //           console.log('[USD UPDATE] => ', Env.usdWallet);
-    //           Log.print(Env.logFileName, '[USD UPDATE] => ' + Env.usdWallet);
-    //         } else {
-    //           Env.usdWallet = wallet[2];
-    //           console.log('[USD UPDATE] => ', Env.usdWallet);
-    //           Log.print(Env.logFileName, '[USD UPDATE] => ' + Env.usdWallet);
-    //         }
-    //       }
-    //     }
-    //   }
   });
   ws.on('close', (res) => {
     error.info('[CLOSED] - ' + res);

@@ -1,5 +1,6 @@
 {
-  "RSIperiod": "3",
-  "timestamp": "1",
-  "currency": "BTC"
+  "RSIperiod": "9",
+  "timestamp": "5",
+  "currency": "NEO",
+  "amount": "95"
 }

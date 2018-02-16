@@ -1,4 +1,4 @@
-const mongoUtil = require('./lib/mongodb');
+// const mongoUtil = require('./lib/mongodb');
 const wsPublic = require('./lib/wsPublic');
 const wsAuth = require('./lib/wsAuth');
 const version = require('./package').version;
@@ -13,8 +13,7 @@ wsAuth.wsAuthConnection();
 // });
 
 function initConsole() {
-  console.log(version + '  /  ' + config.currency + '  /  ' +
-    config.timestamp + 'mn' + '  /  RSI ' + config.RSIperiod + '\n');
-  console2.info('Connection established with Bitfinex API');
+  console.log(version + '  /  ' + config.currency + '  /  ' + config.timestamp +
+    'mn' + '  /  RSI ' + config.RSIperiod + '\n');
   console2.warn('Waiting for trades..\n');
 }
