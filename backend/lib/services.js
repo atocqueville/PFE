@@ -4,16 +4,16 @@ const mongoUtil = require('./mongodb');
 const clientTel = require('./twilio');
 const {trades, console2} = require('./logger');
 const wsAuth = require('./wsAuth');
-let Candle = require('../models/candle');
-
-let task = cron.schedule('*/5 * * * * *', function () {
-  makeDecisions(derniereLocalCandle.DATA);
-}, false);
+const Candle = require('../models/candle');
 
 let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
 let buy, sell, position;
 let walletUSD, walletCrypto, amount;
+
+let task = cron.schedule('*/5 * * * * *', function () {
+  // makeDecisions(derniereLocalCandle.DATA);
+}, false);
 
 function makeDecisions(lastCandle) {
   if (!position) {
@@ -63,19 +63,14 @@ function initJSON(previousCandles) {
   previousCandles.reverse();
   let candlesJSON = [];
 
-  // USE CANDLE MODEL !!
+  let candleTemplate;
   for (let i = 1; i < previousCandles.length; i++) {
-    candlesJSON.push({
-      MTS: previousCandles[i][0],
-      DATA: {
-        CLOSE: previousCandles[i][2],
-        DIFF: previousCandles[i][2] - previousCandles[i - 1][2],
-        AVGGAIN: "",
-        AVGLOSS: "",
-        RSI: ""
-      },
-      DATE: new Date(previousCandles[i][0]).toLocaleTimeString()
-    });
+    candleTemplate = new Candle();
+    candleTemplate.MTS = previousCandles[i][0];
+    candleTemplate.DATA.CLOSE = previousCandles[i][2];
+    candleTemplate.DATA.DIFF = previousCandles[i][2] - previousCandles[i - 1][2];
+    candleTemplate.DATE = new Date(previousCandles[i][0]).toLocaleTimeString();
+    candlesJSON.push(candleTemplate);
   }
 
   let avgGain = 0;
