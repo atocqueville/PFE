@@ -84,12 +84,10 @@ function wsAuthConnection() {
     //   })
     // }
   });
-
   ws.on('close', (res) => {
     error.info('[CLOSED] - ' + res);
     setTimeout(() => wsAuthConnection(), 1000);
   });
-
   ws.on('error', (err) => {
     error.info('[ERROR] - ' + err);
   });
@@ -103,16 +101,32 @@ function buy() {
     {
       cid: Date.now(),
       type: 'EXCHANGE MARKET',
-      symbol: 'NEO',
+      symbol: 't' + config.currency + 'USD',
       amount: '0.25',
       hidden: 0,
     }
   ]);
-  console.log(order);
+  webSocket.send(order);
+}
+
+function sell(amount) {
+  const order = JSON.stringify([
+    0,
+    'on',
+    null,
+    {
+      cid: Date.now(),
+      type: 'EXCHANGE MARKET',
+      symbol: 't' + config.currency + 'USD',
+      amount: (-1 * amount).toString(),
+      hidden: 0,
+    }
+  ]);
   webSocket.send(order);
 }
 
 module.exports = {
   wsAuthConnection: wsAuthConnection,
-  buy: buy
+  buy: buy,
+  sell: sell
 };

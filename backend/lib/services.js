@@ -7,30 +7,31 @@ const wsAuth = require('./wsAuth');
 let Candle = require('../models/candle');
 
 let task = cron.schedule('*/5 * * * * *', function () {
-  // makeDecisions(derniereLocalCandle.DATA);
+  makeDecisions(derniereLocalCandle.DATA);
 }, false);
 
 let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
 let buy, sell, position;
-let walletUSD, walletCrypto;
+let walletUSD, walletCrypto, amount;
 
 function makeDecisions(lastCandle) {
   if (!position) {
     if (lastCandle.RSI < 30) {
+      amount = (walletUSD / lastCandle.CLOSE) * (95 / 100);
+      wsAuth.buy(amount);
       console2.warn('Buy order executed');
       buy = lastCandle.CLOSE;
       trades.info('Achat au prix de : $', buy);
-      position = true;
     }
   } else if (position) {
     if (lastCandle.RSI > 70) {
+      wsAuth.sell(walletCrypto);
       console2.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
       trades.info('Vente au prix de: $', sell);
       trades.trace('Variation après fees: %', ((((sell / buy) - 1) * 100).toFixed(2) - 0.4) + '\n');
       clientTel.sendSMS(buy, sell);
-      position = false;
     }
   }
 }
@@ -39,7 +40,6 @@ function initBot(usd, crypto) {
   walletUSD = usd;
   walletCrypto = crypto;
   position = !!walletCrypto;
-  wsAuth.buy();
   task.start();
 }
 
