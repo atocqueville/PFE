@@ -4,6 +4,7 @@ const mongoUtil = require('./mongodb');
 const clientTel = require('./twilio');
 const {trades, console2} = require('./logger');
 const wsAuth = require('./wsAuth');
+const fs = require('fs');
 const Candle = require('../models/candle');
 
 let derniereLocalCandle = new Candle();
@@ -21,6 +22,7 @@ function makeDecisions(lastCandle) {
       amount = ((walletUSD / lastCandle.CLOSE) * (Number(config.amount) / 100)).toString();
       wsAuth.newOrder(amount);
       console2.warn('Buy order executed');
+      // TODO BUY AND SELL INCORRECT !!
       buy = lastCandle.CLOSE;
       trades.info('Achat au prix de : $', buy);
     }
@@ -42,7 +44,7 @@ function updateWallet(usd, crypto, init) {
   walletCrypto = crypto;
   position = !!walletCrypto;
   if (init) task.start();
-  // TODO: SI START CRYPTO, RECUP DERNIER BUY
+  if (walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[0].split('$')[1]);
 }
 
 function initCandleStack(previousCandles) {
