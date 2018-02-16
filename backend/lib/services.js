@@ -42,7 +42,7 @@ function updateWallet(usd, crypto, init) {
   walletCrypto = crypto;
   position = !!walletCrypto;
   if (init) task.start();
-  // TODO: SI START CRYPTO, RECUP DERNIEER BUY
+  // TODO: SI START CRYPTO, RECUP DERNIER BUY
 }
 
 function initCandleStack(previousCandles) {
