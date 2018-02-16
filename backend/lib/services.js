@@ -12,21 +12,22 @@ let buy, sell, position;
 let walletUSD, walletCrypto, amount;
 
 let task = cron.schedule('*/5 * * * * *', function () {
-  // makeDecisions(derniereLocalCandle.DATA);
+  makeDecisions(derniereLocalCandle.DATA);
 }, false);
 
 function makeDecisions(lastCandle) {
   if (!position) {
-    if (lastCandle.RSI < 30) {
-      amount = (walletUSD / lastCandle.CLOSE) * (95 / 100);
-      wsAuth.buy(amount);
+    if (lastCandle.RSI < 70) {
+      amount = ((walletUSD / lastCandle.CLOSE) * (95 / 100)).toString();
+      wsAuth.newOrder(amount);
       console2.warn('Buy order executed');
       buy = lastCandle.CLOSE;
       trades.info('Achat au prix de : $', buy);
     }
   } else if (position) {
     if (lastCandle.RSI > 70) {
-      wsAuth.sell(walletCrypto);
+      amount = (-1 * walletCrypto).toString();
+      // wsAuth.newOrder(amount);
       console2.warn('Sell order executed\n');
       sell = lastCandle.CLOSE;
       trades.info('Vente au prix de: $', sell);
@@ -36,7 +37,7 @@ function makeDecisions(lastCandle) {
   }
 }
 
-function initBot(usd, crypto) {
+function initWallet(usd, crypto) {
   walletUSD = usd;
   walletCrypto = crypto;
   position = !!walletCrypto;
@@ -169,4 +170,4 @@ function updateMongoDb() {
 
 module.exports.initCandleStack = initCandleStack;
 module.exports.manageCandle = manageCandle;
-module.exports.initBot = initBot;
+module.exports.initWallet = initWallet;

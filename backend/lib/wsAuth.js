@@ -42,7 +42,7 @@ function wsAuthConnection() {
         if (wallet[0] === 'exchange' && wallet[1] === config.currency) walletCrypto = wallet[2];
         if (wallet[0] === 'exchange' && wallet[1] === 'USD') walletUSD = wallet[2];
       });
-      services.initBot(walletUSD, walletCrypto);
+      services.initWallet(walletUSD, walletCrypto);
     }
     // } else if (msg[1] === 'wu') {
     //   //for(let i = 0; i < msg[2].length; i++)
@@ -73,16 +73,6 @@ function wsAuthConnection() {
     //       }
     //     }
     //   }
-    // } else if (msg[1] === 'os') {
-    //   console.log(msg);
-    //   msg[2].forEach(order => {
-    //     if (order[6] > 0) {
-    //       this.lastBuyOrderId = order[1];
-    //     } else if (order[6] < 0) {
-    //       this.lastSellOrderId = order[1];
-    //     }
-    //   })
-    // }
   });
   ws.on('close', (res) => {
     error.info('[CLOSED] - ' + res);
@@ -93,32 +83,14 @@ function wsAuthConnection() {
   });
 }
 
-function buy() {
+function newOrder(amount) {
   const order = JSON.stringify([
-    0,
-    'on',
-    null,
+    0, 'on', null,
     {
       cid: Date.now(),
       type: 'EXCHANGE MARKET',
       symbol: 't' + config.currency + 'USD',
-      amount: '0.25',
-      hidden: 0,
-    }
-  ]);
-  webSocket.send(order);
-}
-
-function sell(amount) {
-  const order = JSON.stringify([
-    0,
-    'on',
-    null,
-    {
-      cid: Date.now(),
-      type: 'EXCHANGE MARKET',
-      symbol: 't' + config.currency + 'USD',
-      amount: (-1 * amount).toString(),
+      amount: amount,
       hidden: 0,
     }
   ]);
@@ -127,6 +99,5 @@ function sell(amount) {
 
 module.exports = {
   wsAuthConnection: wsAuthConnection,
-  buy: buy,
-  sell: sell
+  newOrder: newOrder
 };
