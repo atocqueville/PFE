@@ -10,7 +10,7 @@ const Candle = require('../models/candle');
 let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
 let buy, sell, position;
-let walletUSD, walletCrypto, amount;
+let walletUSD, walletCrypto, buyAmount, benef;
 
 let task = cron.schedule('*/5 * * * * *', function () {
   makeDecisions(derniereLocalCandle.DATA);
@@ -30,16 +30,17 @@ function makeDecisions(lastCandle) {
   }
 }
 
-function setBuy(price) {
+function setBuy(price, amount) {
   buy = price;
+  buyAmount = amount;
   trades.info('Achat au prix de : $', buy);
 }
 
-function setSell(price) {
+function setSell(price, amount) {
   sell = price;
-  trades.info('Vente au prix de: $', sell);
-  trades.trace('Variation après fees: %', ((((sell / buy) - 1) * 100) - 0.4).toFixed(2) + '\n');
-  clientTel.sendSMS(buy, sell);
+  trades.info('Vente au prix de: $', sell + '\n');
+  benef = Number((amount * sell * (-1)) - (buyAmount * buy)).toFixed(2);
+  clientTel.sendSMS(buy, sell, benef);
 }
 
 function updateWallet(usd, crypto, init) {
@@ -47,7 +48,7 @@ function updateWallet(usd, crypto, init) {
   walletCrypto = crypto;
   position = !!walletCrypto;
   if (init) task.start();
-  // if (init && walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[0].split('$')[1]);
+  if (init && walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[1].split('$')[1]);
 }
 
 function initCandleStack(previousCandles) {
