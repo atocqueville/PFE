@@ -10,7 +10,7 @@ const Candle = require('../models/candle');
 let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
 let buy, sell, position;
-let walletUSD, walletCrypto, buyAmount, benef;
+let walletUSD, walletCrypto, orderAmount, buyAmount, benef;
 
 let task = cron.schedule('*/5 * * * * *', function () {
   makeDecisions(derniereLocalCandle.DATA);
@@ -18,28 +18,28 @@ let task = cron.schedule('*/5 * * * * *', function () {
 
 function makeDecisions(lastCandle) {
   if (!position) {
-    if (lastCandle.RSI < 40) {
-      amount = ((walletUSD / lastCandle.CLOSE) * (Number(config.amount) / 100)).toString();
-      wsAuth.newOrder(amount);
+    if (lastCandle.RSI < config.minRSI) {
+      orderAmount = ((walletUSD / lastCandle.CLOSE) * (Number(config.walletUsed) / 100)).toString();
+      wsAuth.newOrder(orderAmount);
     }
   } else if (position) {
-    if (lastCandle.RSI > 60) {
-      amount = (-1 * walletCrypto).toString();
-      wsAuth.newOrder(amount);
+    if (lastCandle.RSI > config.maxRSI) {
+      orderAmount = (-1 * walletCrypto).toString();
+      wsAuth.newOrder(orderAmount);
     }
   }
 }
 
-function setBuy(price, amount) {
+function setBuy(price, amountBought) {
   buy = price;
-  buyAmount = amount;
+  buyAmount = amountBought;
   trades.info('Achat au prix de : $', buy);
 }
 
-function setSell(price, amount) {
+function setSell(price, amountSold) {
   sell = price;
   trades.info('Vente au prix de: $', sell + '\n');
-  benef = Number((amount * sell * (-1)) - (buyAmount * buy)).toFixed(2);
+  benef = Number((amountSold * sell * (-1)) - (buyAmount * buy)).toFixed(2);
   clientTel.sendSMS(buy, sell, benef);
 }
 
@@ -47,8 +47,10 @@ function updateWallet(usd, crypto, init) {
   walletUSD = usd;
   walletCrypto = crypto;
   position = !!walletCrypto;
-  if (init) task.start();
-  if (init && walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[1].split('$')[1]);
+  if (init) {
+    if (walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[1].split('$')[1]);
+    task.start();
+  }
 }
 
 function initCandleStack(previousCandles) {

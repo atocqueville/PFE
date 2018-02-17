@@ -2,5 +2,7 @@
   "RSIperiod": "9",
   "timestamp": "5",
   "currency": "BTC",
-  "amount": "90"
+  "walletUsed": "90",
+  "minRSI": "30",
+  "maxRSI": "70"
 }
