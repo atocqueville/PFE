@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const config = require('../config/config');
 const mongoUtil = require('./mongodb');
 const clientTel = require('./twilio');
-const {trades, console2} = require('./logger');
+const {trades} = require('./logger');
 const wsAuth = require('./wsAuth');
 const fs = require('fs');
 const Candle = require('../models/candle');
@@ -18,25 +18,28 @@ let task = cron.schedule('*/5 * * * * *', function () {
 
 function makeDecisions(lastCandle) {
   if (!position) {
-    if (lastCandle.RSI < 30) {
+    if (lastCandle.RSI < 40) {
       amount = ((walletUSD / lastCandle.CLOSE) * (Number(config.amount) / 100)).toString();
       wsAuth.newOrder(amount);
-      console2.warn('Buy order executed');
-      // TODO BUY AND SELL INCORRECT !!
-      buy = lastCandle.CLOSE;
-      trades.info('Achat au prix de : $', buy);
     }
   } else if (position) {
-    if (lastCandle.RSI > 70) {
+    if (lastCandle.RSI > 60) {
       amount = (-1 * walletCrypto).toString();
       wsAuth.newOrder(amount);
-      console2.warn('Sell order executed\n');
-      sell = lastCandle.CLOSE;
-      trades.info('Vente au prix de: $', sell);
-      trades.trace('Variation après fees: %', ((((sell / buy) - 1) * 100).toFixed(2) - 0.4) + '\n');
-      clientTel.sendSMS(buy, sell);
     }
   }
+}
+
+function setBuy(price) {
+  buy = price;
+  trades.info('Achat au prix de : $', buy);
+}
+
+function setSell(price) {
+  sell = price;
+  trades.info('Vente au prix de: $', sell);
+  trades.trace('Variation après fees: %', ((((sell / buy) - 1) * 100) - 0.4).toFixed(2) + '\n');
+  clientTel.sendSMS(buy, sell);
 }
 
 function updateWallet(usd, crypto, init) {
@@ -44,7 +47,7 @@ function updateWallet(usd, crypto, init) {
   walletCrypto = crypto;
   position = !!walletCrypto;
   if (init) task.start();
-  if (walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[0].split('$')[1]);
+  // if (init && walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[0].split('$')[1]);
 }
 
 function initCandleStack(previousCandles) {
@@ -170,3 +173,5 @@ function updateMongoDb() {
 module.exports.initCandleStack = initCandleStack;
 module.exports.manageCandle = manageCandle;
 module.exports.updateWallet = updateWallet;
+module.exports.setSell = setSell;
+module.exports.setBuy = setBuy;
