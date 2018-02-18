@@ -27,8 +27,8 @@ function wsAuthConnection() {
   const ws = webSocket;
 
   ws.on('open', () => ws.send(JSON.stringify(payload)));
-  ws.on('message', (message) => {
-    const msg = JSON.parse(message);
+  ws.on('message', (res) => {
+    console.log(msg);
     if (msg[1] === 'ws') {
       msg[2].forEach((wallet) => {
         if (wallet[0] === 'exchange' && wallet[1] === config.currency) walletCrypto = wallet[2];

@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const config = require('../config/config');
 const mongoUtil = require('./mongodb');
 const clientTel = require('./twilio');
-const {trades} = require('./logger');
+const {trades, console2} = require('./logger');
 const wsAuth = require('./wsAuth');
 const fs = require('fs');
 const Candle = require('../models/candle');
@@ -19,11 +19,13 @@ let task = cron.schedule('*/5 * * * * *', function () {
 function makeDecisions(lastCandle) {
   if (!position) {
     if (lastCandle.RSI < config.minRSI) {
+      console2.warn('buy order executed');
       orderAmount = ((walletUSD / lastCandle.CLOSE) * (Number(config.walletUsed) / 100)).toString();
       wsAuth.newOrder(orderAmount);
     }
   } else if (position) {
     if (lastCandle.RSI > config.maxRSI) {
+      console2.warn('sell order executed\n');
       orderAmount = (-1 * walletCrypto).toString();
       wsAuth.newOrder(orderAmount);
     }
