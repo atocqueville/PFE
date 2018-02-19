@@ -29,6 +29,7 @@ function wsAuthConnection() {
   ws.on('open', () => ws.send(JSON.stringify(payload)));
   ws.on('message', (res) => {
     let msg = JSON.parse(res);
+    if (msg.event === "auth" && msg.status === "OK") console.log('[Account Connected]');
     if (msg[1] === 'ws') {
       msg[2].forEach((wallet) => {
         if (wallet[0] === 'exchange' && wallet[1] === config.currency) walletCrypto = wallet[2];
