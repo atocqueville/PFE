@@ -1,6 +1,6 @@
 {
-  "RSIperiod": "5",
-  "timestamp": "1",
+  "RSIperiod": "9",
+  "timestamp": "5",
   "currency": "BTC",
   "walletUsed": "90",
   "minRSI": "30",
