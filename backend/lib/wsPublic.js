@@ -4,6 +4,7 @@ const services = require('./services');
 const {error} = require('./logger');
 
 const candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
+let channelID;
 
 function wsPublicConnection() {
   const payload = {
@@ -12,7 +13,6 @@ function wsPublicConnection() {
     key: candleKey
   };
   const ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
-  let channelID;
 
   ws.on('open', () => ws.send(JSON.stringify(payload)));
   ws.on('message', (res) => {
