@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 const config = require('../config/config');
 const services = require('./services');
 const {error} = require('./logger');
+const publicFormat = require('./wsFormat').publicFormat;
 
 const candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 let channelID;
@@ -15,8 +16,9 @@ function wsPublicConnection() {
   const ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
 
   ws.on('open', () => ws.send(JSON.stringify(payload)));
-  ws.on('message', (res) => {
-    let msg = JSON.parse(res);
+  ws.on('message', (message) => {
+    let msg = publicFormat(JSON.parse(message));
+    // console.log(msg);
     if (msg.event && msg.event === 'subscribed') {
       channelID = msg.chanId;
     } else if (msg.length && msg.length > 1 && msg[1] !== 'hb') {

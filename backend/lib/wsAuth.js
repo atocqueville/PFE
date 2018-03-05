@@ -3,6 +3,7 @@ const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
 const {error} = require('./logger');
 const config = require('../config/config');
+const authFormat = require('./wsFormat').authFormat;
 const services = require('./services');
 
 let apiKey = apiKeys.public;
@@ -23,12 +24,13 @@ function wsAuthConnection() {
     event: 'auth',
     filter: ['wallet', 'trading']
   };
-  webSocket = new WebSocket('wss://api.bitfinex.com/ws/2/');
-  const ws = webSocket;
+  const ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
+  webSocket = ws;
 
   ws.on('open', () => ws.send(JSON.stringify(payload)));
-  ws.on('message', (res) => {
-    let msg = JSON.parse(res);
+  ws.on('message', (message) => {
+    let msg = authFormat(JSON.parse(message));
+    // console.log(msg);
     if (msg[1] === 'ws') {
       msg[2].forEach((wallet) => {
         if (wallet[0] === 'exchange' && wallet[1] === config.currency) walletCrypto = wallet[2];

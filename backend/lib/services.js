@@ -3,9 +3,9 @@ const config = require('../config/config');
 const mongoUtil = require('./mongodb');
 const clientTel = require('./twilio');
 const {trades, console2} = require('./logger');
+const wsPublic = require('./wsPublic');
 const wsAuth = require('./wsAuth');
-const fs = require('fs');
-const Candle = require('../models/candle');
+const Candle = require('../models/model').candle;
 
 let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
@@ -13,8 +13,13 @@ let buy, sell, position;
 let walletUSD, walletCrypto, orderAmount, buyAmount, benef;
 
 let task = cron.schedule('*/5 * * * * *', function () {
-  makeDecisions(derniereLocalCandle.DATA);
+  //makeDecisions(derniereLocalCandle.DATA);
 }, false);
+
+function startWebsockets() {
+  wsPublic.wsPublicConnection();
+  wsAuth.wsAuthConnection();
+}
 
 function makeDecisions(lastCandle) {
   if (!position) {
@@ -176,6 +181,7 @@ function updateMongoDb() {
   collection.updateOne({MTS: derniereLocalCandle.MTS}, newValues, {upsert: true});
 }
 
+module.exports.startWebsockets = startWebsockets;
 module.exports.initCandleStack = initCandleStack;
 module.exports.manageCandle = manageCandle;
 module.exports.updateWallet = updateWallet;
