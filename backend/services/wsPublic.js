@@ -1,8 +1,8 @@
 const WebSocket = require('ws');
 const config = require('../config/config');
-const services = require('../services/services');
-const {error} = require('./logger');
-const publicFormat = require('../services/wsFormat').publicFormat;
+const services = require('./services');
+const {error} = require('../lib/logger');
+const publicFormat = require('./wsFormat').publicFormat;
 
 const candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 let channelID;

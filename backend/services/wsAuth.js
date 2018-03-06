@@ -1,10 +1,10 @@
 const WebSocket = require('ws');
 const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
-const {error} = require('./logger');
+const {error} = require('../lib/logger');
 const config = require('../config/config');
-const authFormat = require('../services/wsFormat').authFormat;
-const services = require('../services/services');
+const authFormat = require('./wsFormat').authFormat;
+const services = require('./services');
 
 let apiKey = apiKeys.public;
 let walletUSD, walletCrypto;

@@ -3,9 +3,9 @@ const config = require('../config/config');
 const mongoUtil = require('../lib/mongodb');
 const clientTel = require('../lib/twilio');
 const {trades, console2} = require('../lib/logger');
-const wsPublic = require('../lib/wsPublic');
-const wsAuth = require('../lib/wsAuth');
-const wsServer = require('../lib/wsServer');
+const wsPublic = require('./wsPublic');
+const wsAuth = require('./wsAuth');
+const wsServer = require('./wsServer');
 const Candle = require('../models/model').candle;
 
 let derniereLocalCandle = new Candle();
@@ -14,7 +14,6 @@ let buy, sell, position;
 let walletUSD, walletCrypto, orderAmount, buyAmount, benef;
 
 let task = cron.schedule('*/5 * * * * *', function () {
-  getRSI();
   //makeDecisions(derniereLocalCandle.DATA);
 }, false);
 
@@ -41,8 +40,7 @@ function makeDecisions(lastCandle) {
 }
 
 function getRSI() {
-  console.log('candle', derniereLocalCandle.DATA.RSI);
-  // return derniereLocalCandle.DATA;
+  return derniereLocalCandle.DATA.RSI;
 }
 
 function setBuy(price, amountBought) {
