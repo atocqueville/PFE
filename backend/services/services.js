@@ -1,10 +1,10 @@
 const cron = require('node-cron');
 const config = require('../config/config');
-const mongoUtil = require('./mongodb');
-const clientTel = require('./twilio');
-const {trades, console2} = require('./logger');
-const wsPublic = require('./wsPublic');
-const wsAuth = require('./wsAuth');
+const mongoUtil = require('../lib/mongodb');
+const clientTel = require('../lib/twilio');
+const {trades, console2} = require('../lib/logger');
+const wsPublic = require('../lib/wsPublic');
+const wsAuth = require('../lib/wsAuth');
 const Candle = require('../models/model').candle;
 
 let derniereLocalCandle = new Candle();
