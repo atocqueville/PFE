@@ -8,6 +8,8 @@
 
 # misc
 npm-debug.log
+/config
 config/apikeys.json
 config/twilio.json
+config/config.json
 /logs

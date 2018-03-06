@@ -4,10 +4,10 @@ const config = require('./config/config');
 const startApp = require('./services/services').startWebsockets;
 const express = require('express');
 const app = express();
-let path = require('path');
-let WebSocketServer = require('ws').Server;
+const path = require('path');
+const WebSocket = require('ws');
 
-let wss = new WebSocketServer({port: 40510});
+const wss = new WebSocket.Server({port: 40510});
 
 wss.on('connection', function (ws) {
   ws.on('message', function (message) {
