@@ -39,5 +39,5 @@ function wsPublicConnection() {
 }
 
 module.exports = {
-  wsPublicConnection: wsPublicConnection
+  connection: wsPublicConnection
 };

@@ -5,28 +5,15 @@ const startApp = require('./services/services').startWebsockets;
 const express = require('express');
 const app = express();
 const path = require('path');
-const WebSocket = require('ws');
-
-const wss = new WebSocket.Server({port: 40510});
-
-wss.on('connection', function (ws) {
-  ws.on('message', function (message) {
-    console.log('received: %s', message);
-  });
-
-  setInterval(
-    () => ws.send(`${new Date()}`), 5000
-  );
-});
 
 app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, '../backend/template', 'app.html'));
 });
 
 app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+  console.log('Listening on port 3000!');
   initConsole();
-  // startApp();
+  startApp();
 });
 
 // mongoUtil.connectToServer(function (err) {

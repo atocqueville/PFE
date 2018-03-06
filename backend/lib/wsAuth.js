@@ -73,6 +73,6 @@ function newOrder(amount) {
 }
 
 module.exports = {
-  wsAuthConnection: wsAuthConnection,
+  connection: wsAuthConnection,
   newOrder: newOrder
 };

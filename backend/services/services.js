@@ -5,6 +5,7 @@ const clientTel = require('../lib/twilio');
 const {trades, console2} = require('../lib/logger');
 const wsPublic = require('../lib/wsPublic');
 const wsAuth = require('../lib/wsAuth');
+const wsServer = require('../lib/wsServer');
 const Candle = require('../models/model').candle;
 
 let derniereLocalCandle = new Candle();
@@ -13,12 +14,14 @@ let buy, sell, position;
 let walletUSD, walletCrypto, orderAmount, buyAmount, benef;
 
 let task = cron.schedule('*/5 * * * * *', function () {
+  getRSI();
   //makeDecisions(derniereLocalCandle.DATA);
 }, false);
 
 function startWebsockets() {
-  wsPublic.wsPublicConnection();
-  wsAuth.wsAuthConnection();
+  wsPublic.connection();
+  wsAuth.connection();
+  wsServer.init();
 }
 
 function makeDecisions(lastCandle) {
@@ -35,6 +38,11 @@ function makeDecisions(lastCandle) {
       wsAuth.newOrder(orderAmount);
     }
   }
+}
+
+function getRSI() {
+  console.log('candle', derniereLocalCandle.DATA.RSI);
+  // return derniereLocalCandle.DATA;
 }
 
 function setBuy(price, amountBought) {
@@ -181,6 +189,7 @@ function updateMongoDb() {
   collection.updateOne({MTS: derniereLocalCandle.MTS}, newValues, {upsert: true});
 }
 
+module.exports.getRSI = getRSI;
 module.exports.startWebsockets = startWebsockets;
 module.exports.initCandleStack = initCandleStack;
 module.exports.manageCandle = manageCandle;
