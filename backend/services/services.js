@@ -16,7 +16,7 @@ let running = true;
 
 let task = cron.schedule('*/5 * * * * *', function () {
   //makeDecisions(derniereLocalCandle.DATA);
-  console.log(running);
+  // console.log(running);
 }, false);
 
 function startWebsockets() {
