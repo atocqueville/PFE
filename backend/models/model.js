@@ -1,15 +1,16 @@
 'use strict';
 
-function candle() {
-  this.MTS = "";
-  this.DATA = [
-    this.CLOSE = "",
-    this.DIFF = "",
-    this.AVGGAIN = "",
-    this.AVGLOSS = "",
-    this.RSI = ""
-  ];
-  this.DATE = "";
+class candle {
+  constructor() {
+    this.MTS = '';
+    this.DATA = [];
+    this.DATA.CLOSE = '';
+    this.DATA.DIFF = '';
+    this.DATA.AVGGAIN = '';
+    this.DATA.AVGLOSS = '';
+    this.DATA.RSI = '';
+    this.DATE = '';
+  }
 }
 
 function walletSnapshot() {
