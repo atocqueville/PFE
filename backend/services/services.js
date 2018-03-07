@@ -12,6 +12,7 @@ let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
 let buy, sell, position;
 let walletUSD, walletCrypto, orderAmount, buyAmount, benef;
+let running = true;
 
 let task = cron.schedule('*/5 * * * * *', function () {
   //makeDecisions(derniereLocalCandle.DATA);
@@ -43,6 +44,12 @@ function getRSI() {
   return derniereLocalCandle.DATA.RSI;
 }
 
+function setStatus(bool) {
+  if (bool) task.start();
+  else task.stop();
+  running = bool;
+}
+
 function setBuy(price, amountBought) {
   buy = price;
   buyAmount = amountBought;
@@ -63,7 +70,9 @@ function updateWallet(usd, crypto, init) {
   if (init) {
     // TODO REFACTO OLD BUY
     // if (walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[1].split('$')[1]);
-    task.start();
+    if (running) {
+      task.start();
+    }
   }
 }
 
@@ -187,6 +196,7 @@ function updateMongoDb() {
   collection.updateOne({MTS: derniereLocalCandle.MTS}, newValues, {upsert: true});
 }
 
+module.exports.setStatus = setStatus;
 module.exports.getRSI = getRSI;
 module.exports.startWebsockets = startWebsockets;
 module.exports.initCandleStack = initCandleStack;

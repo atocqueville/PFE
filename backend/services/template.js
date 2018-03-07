@@ -7,3 +7,7 @@ ws.onopen = function () {
 ws.onmessage = function (ev) {
   document.getElementById("rsi").innerHTML = ev.data;
 };
+
+function updateStatus(status) {
+  ws.send(status);
+}
