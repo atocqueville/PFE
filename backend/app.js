@@ -4,16 +4,19 @@ const config = require('./config/config');
 const startServer = require('./services/services').startWebsockets;
 const express = require('express');
 const app = express();
-const path = require('path');
-
-app.use(express.static('services'));
 
 app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, '../backend', 'index.html'));
+  res.json([{
+    id: 1,
+    username: "samsepi0l"
+  }, {
+    id: 2,
+    username: "D0loresH4ze"
+  }]);
 });
 
-app.listen(3000, function () {
-  console.log('Listening on port 3000!');
+app.listen(3001, function () {
+  console.log('Listening on port 3001!');
   initConsole();
   startServer();
 });
