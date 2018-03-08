@@ -1,0 +1,39 @@
+.App-header {
+    background-color: #222;
+    height: 80px;
+    line-height: 80px;
+    color: white;
+    display: flex;
+    padding-left: 7%;
+    font-size: 18px;
+}
+
+.logo {
+    max-width: 70%;
+    max-height: 70%;
+    vertical-align: middle
+}
+
+.logo-titre {
+    padding-left: 20px;
+}
+
+.link-header {
+    text-decoration: none;
+    color: white;
+}
+
+.link-header:hover {
+    text-decoration: none;
+    background-color: #373940;
+}
+
+.Header-active a {
+    background-color: #373940;
+}
+
+.App-title {
+    font-size: 1.3em;
+    padding-left: 40px;
+    padding-right: 40px;
+}

@@ -1,10 +1,10 @@
 import React from "react";
+import './home.css';
 
 const Home = () => (
-  <div>
-    <p>
-      RSI : <span id="rsi">Waiting for server..</span>
-    </p>
+  <div className="Home">
+    <h1>Home</h1>
+    <span id="rsi">Waiting for server..</span>
     {/*<Chart/>*/}
     {/*<p>*/}
     {/*<input type="button" id="start" onclick="updateStatus(id)" value="Start">*/}

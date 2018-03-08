@@ -3,13 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "classnames": "^2.2.5",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.1",
-    "react-tradingview-widget": "^1.2.2",
-    "socket.io": "^2.0.4",
-    "socket.io-client": "^2.0.4"
+    "react-tradingview-widget": "^1.2.2"
   },
   "scripts": {
     "start": "react-scripts start",

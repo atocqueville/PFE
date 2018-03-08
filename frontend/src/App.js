@@ -2,10 +2,10 @@ import React, {Component} from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom'
 import Header from './components/header';
 import Home from './components/home';
-import Stats from './stats';
+import Stats from './components/stats';
 import About from './components/about';
-// import Chart from './chart';
 import './App.css';
+// import Chart from './chart';
 
 class App extends Component {
 
@@ -17,13 +17,15 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
+      <div>
         <Router>
           <div>
             <Header/>
-            <Route exact path="/" component={Home}/>
-            <Route path="/stats" component={Stats}/>
-            <Route path="/about" component={About}/>
+            <div className="body-container">
+              <Route exact path="/" component={Home}/>
+              <Route path="/stats" component={Stats}/>
+              <Route path="/about" component={About}/>
+            </div>
           </div>
         </Router>
       </div>
