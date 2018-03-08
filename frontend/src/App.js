@@ -1,19 +1,13 @@
 import React, {Component} from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom'
-import Header from './components/header';
-import Home from './components/home';
-import Stats from './components/stats';
-import About from './components/about';
+import Header from './components/header/header';
+import Home from './components/home/home';
+import Stats from './components/stats/stats';
+import About from './components/about/about';
 import './App.css';
 // import Chart from './chart';
 
 class App extends Component {
-
-  componentDidMount() {
-    fetch('/users')
-      .then(res => res.json())
-      .then(users => console.log(users));
-  }
 
   render() {
     return (
