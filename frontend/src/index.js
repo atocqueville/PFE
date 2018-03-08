@@ -4,14 +4,14 @@ import './index.css';
 import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 
-const ws = new WebSocket('ws://localhost:40510');
+let ws = new WebSocket('ws://localhost:3001');
 
 ws.onopen = function () {
-  ws.send('client connected');
+  ws.send('New client !');
 };
 
-ws.onmessage = function (ev) {
-  document.getElementById("rsi").innerHTML = ev.data;
+ws.onmessage = function (event) {
+  document.getElementById("rsi").innerHTML = event.data;
 };
 
 // function updateStatus(status) {

@@ -3,9 +3,10 @@ const version = require('./package').version;
 const config = require('./config/config');
 const startServer = require('./services/services').startWebsockets;
 const express = require('express');
+const wsServer = require('ws').Server;
 const app = express();
 
-app.get('/', function (req, res) {
+app.get('/users', function (req, res) {
   res.json([{
     id: 1,
     username: "samsepi0l"
@@ -15,11 +16,25 @@ app.get('/', function (req, res) {
   }]);
 });
 
-app.listen(3001, function () {
+let server = app.listen(3001, function () {
   console.log('Listening on port 3001!');
-  initConsole();
   startServer();
+  // initConsole();
 });
+
+const wss = new wsServer({server});
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+  ws.on('message', (message) => console.log(message));
+  ws.on('close', () => console.log('Client disconnected'));
+});
+
+setInterval(() => {
+  wss.clients.forEach((client) => {
+    client.send(new Date().toTimeString());
+  });
+}, 1000);
+
 
 // mongoUtil.connectToServer(function (err) {
 //   if (err) error.info('[Mongo] - ' + err);

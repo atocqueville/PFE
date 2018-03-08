@@ -22,7 +22,7 @@ let task = cron.schedule('*/5 * * * * *', function () {
 function startWebsockets() {
   wsPublic.connection();
   wsAuth.connection();
-  wsServer.init();
+  // wsServer.init();
 }
 
 function makeDecisions(lastCandle) {
