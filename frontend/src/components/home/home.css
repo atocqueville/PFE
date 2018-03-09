@@ -1,3 +1,18 @@
 .home {
-    font-size: 18px;
+    display: flex;
+    flex-direction: row;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.left-side {
+    width: 30%;
+}
+
+.right-side {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
 }

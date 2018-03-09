@@ -1,6 +1,5 @@
 import React from "react";
-
-// import './history.css';
+import './history.css';
 
 class History extends React.Component {
 

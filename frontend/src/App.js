@@ -11,9 +11,8 @@ class App extends Component {
 
   render() {
     return (
-      <div>
         <Router>
-          <div>
+          <div className="global-container">
             <Header/>
             <div className="body-container">
               <Route exact path="/" component={Home}/>
@@ -22,7 +21,6 @@ class App extends Component {
             </div>
           </div>
         </Router>
-      </div>
     );
   }
 }

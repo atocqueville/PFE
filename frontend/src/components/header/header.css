@@ -1,7 +1,11 @@
-.App-header {
+.header-container {
+    height: 10vh;
+}
+
+.app-header {
     background-color: #222;
-    height: 80px;
-    line-height: 80px;
+    height: 100%;
+    line-height: 70px;
     color: white;
     display: flex;
     padding-left: 7%;
@@ -32,7 +36,7 @@
     background-color: #373940;
 }
 
-.App-title {
+.app-title {
     font-size: 1.3em;
     padding-left: 40px;
     padding-right: 40px;

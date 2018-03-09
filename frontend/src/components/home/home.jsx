@@ -1,8 +1,8 @@
 import React from "react";
 import './home.css';
-import Config from 'config/config';
-import Chart from 'chart/chart';
-import History from 'history/history';
+import Config from './config/config';
+import Chart from './chart/chart';
+import History from './history/history';
 
 class Home extends React.Component {
   constructor(props) {
@@ -30,10 +30,13 @@ class Home extends React.Component {
   render() {
     return (
       <div className="home">
-        <h1>Home</h1>
-        <Config/>
-        <Chart/>
-        <History/>
+        <div className="left-side">
+          <Config/>
+        </div>
+        <div className="right-side">
+          <Chart/>
+          <History/>
+        </div>
       </div>
     );
   }

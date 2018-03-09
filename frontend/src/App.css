@@ -4,9 +4,12 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
+.global-container {
+    height: 100vh;
+}
+
 .body-container {
-    border-style: solid;
-    margin-top: 50px;
-    margin-left: 10%;
-    margin-right: 10%;
+    height: 90vh;
+    padding-left: 15%;
+    padding-right: 15%;
 }
