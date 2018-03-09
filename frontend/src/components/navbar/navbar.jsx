@@ -5,10 +5,10 @@ import logo from '../../assets/logo.png';
 
 const Navbar = () => (
   <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-    <NavLink className="navbar-brand" to="/">
+    <span className="navbar-brand">
       <img src={logo} width="30" height="30"
            className="d-inline-block align-top" alt="risitas"/>Bot RSI
-    </NavLink>
+    </span>
     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
       <span className="navbar-toggler-icon"></span>
