@@ -1,4 +1,7 @@
 .config {
-    height: 40%;
     margin-bottom: 8%;
+}
+
+.config .card {
+    height: 100%;
 }

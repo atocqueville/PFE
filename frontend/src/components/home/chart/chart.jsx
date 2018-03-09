@@ -3,13 +3,18 @@ import './chart.css';
 import TradingViewWidget from 'react-tradingview-widget';
 
 const Chart = () => (
-  <div className="chart">
-    <TradingViewWidget
-      symbol="BITFINEX:BTCUSD"
-      theme="Dark"
-      locale="fr"
-      autosize
-    />
+  <div className="chart-container">
+    <div className="card">
+      <h5 className="card-header">Chart</h5>
+      <div className="chart">
+        <TradingViewWidget
+          symbol="BITFINEX:BTCUSD"
+          theme="Dark"
+          locale="fr"
+          autosize
+        />
+      </div>
+    </div>
   </div>
 );
 

@@ -9,9 +9,50 @@ class Config extends React.Component {
         <div className="card">
           <h5 className="card-header">Config</h5>
           <div className="card-body">
-            <h5 className="card-title">Special title treatment</h5>
-            <p className="card-text">With supporting text below as a natural lead-in to additional content.</p>
-            <a href="#" className="btn btn-primary">Go somewhere</a>
+
+            <form>
+              <div className="form-row">
+                <div className="col">
+                  <select class="custom-select mr-sm-2" id="crypto">
+                    <option selected>Crypto</option>
+                    <option value="1">BTC</option>
+                    <option value="2">ETH</option>
+                    <option value="3">XRP</option>
+                  </select>
+                </div>
+                <div className="col">
+                  <select class="custom-select mr-sm-2" id="period">
+                    <option selected>Period</option>
+                    <option value="1">5mn</option>
+                    <option value="2">15mn</option>
+                    <option value="3">30mn</option>
+                  </select>
+                </div>
+                <div className="col">
+                  <select class="custom-select mr-sm-2" id="rsi">
+                    <option selected>RSI</option>
+                    <option value="1">5</option>
+                    <option value="2">9</option>
+                    <option value="3">14</option>
+                  </select>
+                </div>
+              </div>
+              <br/>
+              <div className="form-row">
+                <div className="col">
+                  <input type="text" className="form-control" placeholder="City"/>
+                </div>
+                <div className="col">
+                  <input type="text" className="form-control" placeholder="State"/>
+                </div>
+                <div className="col">
+                  <input type="text" className="form-control" placeholder="Zip"/>
+                </div>
+              </div>
+            </form>
+            <br/>
+            <button type="button" className="btn btn-success btn-sm">Start</button>
+            <button type="button" className="btn btn-danger btn-sm">Stop</button>
           </div>
         </div>
       </div>
