@@ -6,11 +6,13 @@ class History extends Component {
   render() {
     return (
       <div className="history">
-        <div className="card">
-          <h5 className="card-header">History</h5>
+        <div className="card border-secondary mb-3">
+          <h5 className="card-header">4 last transactions</h5>
           <div className="card-body">
-            <h5 className="card-title">Special title treatment</h5>
-            <p className="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            <p className="card-text">Buy 0.25 BTC at $9450</p>
+            <p className="card-text">Buy 0.25 BTC at $9450</p>
+            <p className="card-text">Buy 0.25 BTC at $9450</p>
+            <p className="card-text">Buy 0.25 BTC at $9450</p>
           </div>
         </div>
       </div>

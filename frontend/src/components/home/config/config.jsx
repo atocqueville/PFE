@@ -6,14 +6,14 @@ class Config extends React.Component {
   render() {
     return (
       <div className="config">
-        <div className="card">
+        <div className="card border-secondary mb-3">
           <h5 className="card-header">Config</h5>
           <div className="card-body">
 
             <form>
               <div className="form-row">
                 <div className="col">
-                  <select class="custom-select mr-sm-2" id="crypto">
+                  <select className="custom-select mr-sm-2" id="crypto">
                     <option selected>Crypto</option>
                     <option value="1">BTC</option>
                     <option value="2">ETH</option>
@@ -21,7 +21,7 @@ class Config extends React.Component {
                   </select>
                 </div>
                 <div className="col">
-                  <select class="custom-select mr-sm-2" id="period">
+                  <select className="custom-select mr-sm-2" id="period">
                     <option selected>Period</option>
                     <option value="1">5mn</option>
                     <option value="2">15mn</option>
@@ -29,7 +29,7 @@ class Config extends React.Component {
                   </select>
                 </div>
                 <div className="col">
-                  <select class="custom-select mr-sm-2" id="rsi">
+                  <select className="custom-select mr-sm-2" id="rsi">
                     <option selected>RSI</option>
                     <option value="1">5</option>
                     <option value="2">9</option>
@@ -40,13 +40,13 @@ class Config extends React.Component {
               <br/>
               <div className="form-row">
                 <div className="col">
-                  <input type="text" className="form-control" placeholder="City"/>
+                  <input type="text" className="form-control" placeholder="Wallet %"/>
                 </div>
                 <div className="col">
-                  <input type="text" className="form-control" placeholder="State"/>
+                  <input type="text" className="form-control" placeholder="RSI min"/>
                 </div>
                 <div className="col">
-                  <input type="text" className="form-control" placeholder="Zip"/>
+                  <input type="text" className="form-control" placeholder="RSI max"/>
                 </div>
               </div>
             </form>
