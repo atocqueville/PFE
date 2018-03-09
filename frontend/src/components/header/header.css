@@ -5,11 +5,15 @@
 .app-header {
     background-color: #222;
     height: 100%;
-    line-height: 70px;
     color: white;
     display: flex;
     padding-left: 7%;
     font-size: 18px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
 }
 
 .logo {
@@ -25,6 +29,8 @@
 .link-header {
     text-decoration: none;
     color: white;
+    display: flex;
+    align-items: center;
 }
 
 .link-header:hover {

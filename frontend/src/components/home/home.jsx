@@ -32,10 +32,10 @@ class Home extends React.Component {
       <div className="home">
         <div className="left-side">
           <Config/>
+          <History/>
         </div>
         <div className="right-side">
           <Chart/>
-          <History/>
         </div>
       </div>
     );

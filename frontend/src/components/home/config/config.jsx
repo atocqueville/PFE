@@ -6,16 +6,14 @@ class Config extends React.Component {
   render() {
     return (
       <div className="config">
-        <h1>Config</h1>
-        <form>
-          <input type="button" id="start" value="Start"/>
-          <input type="button" id="stop" value="Stop"/>
-          {/*<label>*/}
-          {/*Name:*/}
-          {/*<input type="text" value={this.state.value} onChange={this.handleChange} />*/}
-          {/*</label>*/}
-          <input type="button" value="Submit"/>
-        </form>
+        <div className="card">
+          <h5 className="card-header">Config</h5>
+          <div className="card-body">
+            <h5 className="card-title">Special title treatment</h5>
+            <p className="card-text">With supporting text below as a natural lead-in to additional content.</p>
+            <a href="#" className="btn btn-primary">Go somewhere</a>
+          </div>
+        </div>
       </div>
     );
   }
