@@ -1,3 +1,7 @@
 .navbar-brand {
     cursor: default;
 }
+
+.brand-name {
+    padding-left: 8px;
+}

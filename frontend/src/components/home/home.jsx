@@ -1,10 +1,10 @@
-import React from "react";
-import './home.css';
+import React, {Component} from "react";
 import Config from './config/config';
-import Chart from './chart/chart';
 import History from './history/history';
+import Chart from './chart/chart';
+import './home.css';
 
-class Home extends React.Component {
+class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {date: new Date()};
@@ -29,15 +29,17 @@ class Home extends React.Component {
 
   render() {
     return (
-      <div className="home">
-        <div className="left-side">
+      <main>
+        <section>
           <Config/>
+        </section>
+        <section>
           <History/>
-        </div>
-        <div className="right-side">
+        </section>
+        <section className="chart">
           <Chart/>
-        </div>
-      </div>
+        </section>
+      </main>
     );
   }
 }

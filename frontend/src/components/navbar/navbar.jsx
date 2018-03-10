@@ -7,11 +7,12 @@ const Navbar = () => (
   <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
     <span className="navbar-brand">
       <img src={logo} width="30" height="30"
-           className="d-inline-block align-top" alt="risitas"/>Bot RSI
+           className="d-inline-block align-top" alt="risitas"/>
+      <span className="brand-name">Bot RSI</span>
     </span>
     <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-      <span className="navbar-toggler-icon"></span>
+      <span className="navbar-toggler-icon"/>
     </button>
     <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
       <div className="navbar-nav">
