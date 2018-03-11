@@ -1,0 +1,12 @@
+.button-container {
+    display: flex;
+    justify-content: center;
+}
+
+.start-button {
+    margin-right: 5px;
+}
+
+.stop-button {
+    margin-left: 5px;
+}

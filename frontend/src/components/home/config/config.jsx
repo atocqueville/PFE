@@ -51,9 +51,9 @@ class Config extends Component {
           </form>
           <br/>
 
-          <div>
-            <button type="button" className="btn btn-success btn-sm">Start</button>
-            <button type="button" className="btn btn-danger btn-sm">Stop</button>
+          <div className="button-container">
+            <button type="button" className="btn btn-success start-button">Start</button>
+            <button type="button" className="btn btn-danger stop-button">Stop</button>
           </div>
         </div>
       </div>
