@@ -1,8 +1,0 @@
-.chart-container {
-    height: 100%;
-}
-
-.card-chart {
-    height: inherit;
-    height: -webkit-fill-available;
-}
