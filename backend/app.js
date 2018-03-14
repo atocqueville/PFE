@@ -5,7 +5,7 @@ const wsServer = require('ws').Server;
 const app = express();
 
 let server = app.listen(3001, async () => {
-  await mongo.initMongo();
+  await mongo.init();
   startServer();
 });
 

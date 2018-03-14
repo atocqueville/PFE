@@ -25,7 +25,6 @@ let task = cron.schedule('*/5 * * * * *', function () {
 
 function startWebsockets() {
   initConfig();
-  console.log(config);
   // wsPublic.connection();
   // wsAuth.connection();
   // wsServer.init();

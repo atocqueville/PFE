@@ -1,32 +1,39 @@
 'use strict';
 
 const MongoClient = require('mongodb').MongoClient;
-const config = require('../config/config');
 
 const url = 'mongodb://localhost:27017/botrsi';
 const dbName = 'botrsi';
-let _db, _config, collection;
+let _db, collection;
 let options = {
   keepAlive: 1,
   socketTimeoutMS: 10000,
   connectTimeoutMS: 10000
 };
+let config = {
+  RSIperiod: "9",
+  timestamp: "5",
+  currency: "BTC",
+  walletUsed: "90",
+  minRSI: "30",
+  maxRSI: "70"
+};
 
 function initConfig(doc) {
   if (doc) {
-    _config = doc;
+    config = doc;
     return doc;
   } else {
     return collection.insertOne(config)
       .then(function (item) {
-        _config = item.ops[0];
+        config = item.ops[0];
         return item;
       });
   }
 }
 
 module.exports = {
-  initMongo: function () {
+  init: function () {
     return MongoClient.connect(url, options)
       .then(function (client) {
         _db = client.db(dbName);
@@ -46,6 +53,6 @@ module.exports = {
   },
 
   getConfig: function () {
-    return _config;
+    return config;
   }
 };
