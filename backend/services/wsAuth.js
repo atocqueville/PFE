@@ -2,15 +2,17 @@ const WebSocket = require('ws');
 const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
 const {error} = require('../lib/logger');
-const config = require('../config/config');
+const mongo = require('../lib/mongodb');
 const authFormat = require('./wsFormat').authFormat;
 const services = require('./services');
 
 let apiKey = apiKeys.public;
 let walletUSD, walletCrypto;
 let webSocket;
+let config;
 
 function wsAuthConnection() {
+  initConfig();
   const authNonce = Date.now() * 1000;
   const authPayload = 'AUTH' + authNonce;
   const authSig = Crypto
@@ -70,6 +72,10 @@ function newOrder(amount) {
     }
   ]);
   webSocket.send(order);
+}
+
+function initConfig() {
+  config = mongo.getConfig();
 }
 
 module.exports = {

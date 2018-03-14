@@ -1,13 +1,13 @@
 const WebSocket = require('ws');
-const config = require('../config/config');
+const mongo = require('../lib/mongodb');
 const services = require('./services');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
-const candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
-let channelID;
+let candleKey, channelID, config;
 
 function wsPublicConnection() {
+  initConfig();
   const payload = {
     event: 'subscribe',
     channel: 'candles',
@@ -36,6 +36,11 @@ function wsPublicConnection() {
   ws.on('error', (err) => {
     error.warn('[ERROR] - ' + err);
   });
+}
+
+function initConfig() {
+  config = mongo.getConfig();
+  candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
 }
 
 module.exports = {

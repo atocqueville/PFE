@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const mongoUtil = require('../lib/mongodb');
+const mongo = require('../lib/mongodb');
 const clientTel = require('../lib/twilio');
 const {trades, console2} = require('../lib/logger');
 const wsPublic = require('./wsPublic');
@@ -20,7 +20,7 @@ let task = cron.schedule('*/5 * * * * *', function () {
 }, false);
 
 function startWebsockets() {
-  config = mongoUtil.getConfig();
+  initConfig();
   // wsPublic.connection();
   // wsAuth.connection();
   // wsServer.init();
@@ -79,18 +79,6 @@ function updateWallet(usd, crypto, init) {
 }
 
 function initCandleStack(previousCandles) {
-  initJSON(previousCandles);
-  // let db = mongoUtil.getDb();
-  // let collection = db.collection('candles');
-  // collection.deleteMany(function (err, delOK) {
-  //   if (err) throw err;
-  //   collection.insertMany(initJSON(previousCandles), function (err) {
-  //     if (err) throw err;
-  //   });
-  // });
-}
-
-function initJSON(previousCandles) {
   previousCandles.reverse();
   let candlesJSON = [];
 
@@ -176,6 +164,10 @@ function updateLocalLastCandle(lastCandle) {
   }
   derniereLocalCandle.DATA.RSI = 100 - (100 / (1 + (derniereLocalCandle.DATA.AVGGAIN / derniereLocalCandle.DATA.AVGLOSS)));
   derniereLocalCandle.DATE = new Date(derniereLocalCandle.MTS).toLocaleTimeString();
+}
+
+function initConfig() {
+  config = mongo.getConfig();
 }
 
 module.exports.setStatus = setStatus;
