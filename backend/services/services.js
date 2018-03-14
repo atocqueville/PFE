@@ -25,9 +25,9 @@ let task = cron.schedule('*/5 * * * * *', function () {
 
 function startWebsockets() {
   initConfig();
-  // wsPublic.connection();
-  // wsAuth.connection();
-  // wsServer.init();
+  wsPublic.connection();
+  wsAuth.connection();
+  wsServer.init();
 }
 
 function makeDecisions(lastCandle) {
@@ -46,14 +46,11 @@ function makeDecisions(lastCandle) {
   }
 }
 
-function getRSI() {
-  return derniereLocalCandle.DATA.RSI;
-}
-
 function setStatus(bool) {
-  if (bool) task.start();
-  else task.stop();
-  running = bool;
+  // if (bool) task.start();
+  // else task.stop();
+  // running = bool;
+  console.log(bool);
 }
 
 function setBuy(price, amountBought) {
@@ -179,7 +176,6 @@ function initConfig() {
 }
 
 module.exports.setStatus = setStatus;
-module.exports.getRSI = getRSI;
 module.exports.startWebsockets = startWebsockets;
 module.exports.initCandleStack = initCandleStack;
 module.exports.manageCandle = manageCandle;

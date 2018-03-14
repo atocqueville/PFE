@@ -11,11 +11,6 @@ function wsServerInit() {
       if (message === 'stop') services.setStatus(false);
       if (message === 'start') services.setStatus(true);
     });
-
-    setInterval(
-      () =>
-        ws.send(services.getRSI()), 2000
-    );
   });
 }
 

@@ -11,7 +11,6 @@ let webSocket;
 let config;
 
 function wsAuthConnection() {
-  initConfig();
   const authNonce = Date.now() * 1000;
   const authPayload = 'AUTH' + authNonce;
   const authSig = Crypto

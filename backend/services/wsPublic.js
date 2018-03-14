@@ -6,7 +6,6 @@ const publicFormat = require('./wsFormat').publicFormat;
 let candleKey, channelID, config;
 
 function wsPublicConnection() {
-  initConfig();
   const payload = {
     event: 'subscribe',
     channel: 'candles',
