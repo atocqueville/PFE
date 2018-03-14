@@ -54,7 +54,7 @@ function setStatus(bool) {
 function setBuy(price, amountBought) {
   buy = price;
   buyAmount = amountBought;
-  trades.info('Achat au prix de : $', buy);
+  trades.info(`Achat au prix de : ${buy}$`);
 }
 
 function setSell(price, amountSold) {
