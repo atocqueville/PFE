@@ -14,26 +14,26 @@ let options = {
 };
 
 module.exports = {
-  connectToServer: function (callback) {
-    MongoClient.connect(url, options)
+  initConfig: function () {
+    return MongoClient.connect(url, options)
       .then(function (client) {
         console.log('init mongodb');
         _db = client.db(dbName);
         const collection = _db.collection('config');
-
-        collection.findOne(function (err, res) {
-          if (err) throw err;
-          if (res) {
-            _config = res;
-            return callback(client);
-          } else {
-            collection.insertOne(config, function (err, res) {
-              if (err) throw err;
-              _config = res.ops[0];
-              return callback(client);
-            });
-          }
-        });
+        return collection.findOne()
+          .then(function (item) {
+            if (item) {
+              _config = item;
+              return item
+            } else {
+              return collection.insertOne(config)
+                .then(function (item) {
+                  _config = item.ops[0];
+                  console.log('final action');
+                  return item;
+                });
+            }
+          });
       })
       .catch((err) => {
         console.log(err);
