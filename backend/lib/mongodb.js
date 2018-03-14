@@ -5,35 +5,36 @@ const config = require('../config/config');
 
 const url = 'mongodb://localhost:27017/botrsi';
 const dbName = 'botrsi';
-let _db;
-let _config;
+let _db, _config, collection;
 let options = {
   keepAlive: 1,
   socketTimeoutMS: 10000,
   connectTimeoutMS: 10000
 };
 
+function initConfig(doc) {
+  if (doc) {
+    _config = doc;
+    return doc;
+  } else {
+    return collection.insertOne(config)
+      .then(function (item) {
+        _config = item.ops[0];
+        return item;
+      });
+  }
+}
+
 module.exports = {
-  initConfig: function () {
+  initMongo: function () {
     return MongoClient.connect(url, options)
       .then(function (client) {
-        console.log('init mongodb');
         _db = client.db(dbName);
-        const collection = _db.collection('config');
-        return collection.findOne()
-          .then(function (item) {
-            if (item) {
-              _config = item;
-              return item
-            } else {
-              return collection.insertOne(config)
-                .then(function (item) {
-                  _config = item.ops[0];
-                  console.log('final action');
-                  return item;
-                });
-            }
-          });
+        collection = _db.collection('config');
+        return collection.findOne();
+      })
+      .then(function (doc) {
+        return initConfig(doc);
       })
       .catch((err) => {
         console.log(err);
