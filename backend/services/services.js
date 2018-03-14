@@ -1,5 +1,4 @@
 const cron = require('node-cron');
-const config = require('../config/config');
 const mongoUtil = require('../lib/mongodb');
 const clientTel = require('../lib/twilio');
 const {trades, console2} = require('../lib/logger');
@@ -8,6 +7,7 @@ const wsAuth = require('./wsAuth');
 const wsServer = require('./wsServer');
 const Candle = require('../models/model').candle;
 
+let config;
 let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
 let buy, sell, position;
@@ -20,8 +20,9 @@ let task = cron.schedule('*/5 * * * * *', function () {
 }, false);
 
 function startWebsockets() {
-  wsPublic.connection();
-  wsAuth.connection();
+  config = mongoUtil.getConfig();
+  // wsPublic.connection();
+  // wsAuth.connection();
   // wsServer.init();
 }
 
@@ -145,7 +146,6 @@ function initJSON(previousCandles) {
 
 function manageCandle(lastCandle) {
   if (lastCandle[0] > derniereLocalCandle.MTS) {
-    // updateMongoDb();
     avantDerniereLocalCandle.MTS = derniereLocalCandle.MTS;
     avantDerniereLocalCandle.DATA.CLOSE = derniereLocalCandle.DATA.CLOSE;
     avantDerniereLocalCandle.DATA.DIFF = derniereLocalCandle.DATA.DIFF;
@@ -176,25 +176,6 @@ function updateLocalLastCandle(lastCandle) {
   }
   derniereLocalCandle.DATA.RSI = 100 - (100 / (1 + (derniereLocalCandle.DATA.AVGGAIN / derniereLocalCandle.DATA.AVGLOSS)));
   derniereLocalCandle.DATE = new Date(derniereLocalCandle.MTS).toLocaleTimeString();
-}
-
-function updateMongoDb() {
-  let db = mongoUtil.getDb();
-  let collection = db.collection('candles');
-  let newValues = {
-    $set: {
-      MTS: derniereLocalCandle.MTS,
-      DATA: {
-        CLOSE: derniereLocalCandle.DATA.CLOSE,
-        DIFF: derniereLocalCandle.DATA.DIFF,
-        AVGGAIN: derniereLocalCandle.DATA.AVGGAIN,
-        AVGLOSS: derniereLocalCandle.DATA.AVGLOSS,
-        RSI: derniereLocalCandle.DATA.RSI
-      },
-      DATE: new Date(derniereLocalCandle.MTS).toLocaleTimeString()
-    }
-  };
-  collection.updateOne({MTS: derniereLocalCandle.MTS}, newValues, {upsert: true});
 }
 
 module.exports.setStatus = setStatus;

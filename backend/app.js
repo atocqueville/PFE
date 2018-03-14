@@ -1,5 +1,4 @@
 const mongoUtil = require('./lib/mongodb');
-const config = require('./config/config');
 const startServer = require('./services/services').startWebsockets;
 const express = require('express');
 const wsServer = require('ws').Server;
@@ -7,10 +6,8 @@ const app = express();
 
 let server = app.listen(3001, function () {
   // console.log('init express server');
-  mongoUtil.connectToServer(function (client) {
-    console.log('je viens apres ?');
-    // startServer();
-    // initConsole();
+  mongoUtil.connectToServer(() => {
+    startServer();
   });
 });
 
@@ -36,7 +33,3 @@ let server = app.listen(3001, function () {
 //     client.send(new Date().toTimeString());
 //   });
 // }, 1000);
-
-function initConsole() {
-  console.log(`${config.currency} / ${config.timestamp}mn /  RSI ${config.RSIperiod}\n`);
-}

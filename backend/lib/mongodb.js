@@ -20,19 +20,16 @@ module.exports = {
         console.log('init mongodb');
         _db = client.db(dbName);
         const collection = _db.collection('config');
-        collection.find({}).toArray(function (err, docs) {
-          if (!docs.length) {
-            console.log('pas de config en base');
+
+        collection.findOne(function (err, res) {
+          if (err) throw err;
+          if (res) {
+            _config = res;
+            return callback(client);
+          } else {
             collection.insertOne(config, function (err, res) {
               if (err) throw err;
               _config = res.ops[0];
-              return callback(client);
-            });
-          } else {
-            console.log('exists, on recupere la config en base');
-            collection.findOne(function (err, res) {
-              if (err) throw err;
-              _config = res;
               return callback(client);
             });
           }
