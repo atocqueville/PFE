@@ -2,8 +2,8 @@
 
 const config = require('../config/twilio');
 const twilio = require('twilio');
-const currency = require('../config/config').currency;
-//TODO recup from Mongo
+
+let currency;
 let client = new twilio(config.accountSid, config.authToken);
 
 function sendSMS(buy, sell, benef) {
@@ -19,6 +19,11 @@ function sendSMS(buy, sell, benef) {
   });
 }
 
+function setConfig(configMongo) {
+  currency = configMongo.currency;
+}
+
 module.exports = {
-  sendSMS
+  sendSMS,
+  setConfig
 };

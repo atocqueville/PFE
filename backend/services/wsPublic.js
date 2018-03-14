@@ -1,5 +1,4 @@
 const WebSocket = require('ws');
-const mongo = require('../lib/mongodb');
 const services = require('./services');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
@@ -38,11 +37,11 @@ function wsPublicConnection() {
   });
 }
 
-function initConfig() {
-  config = mongo.getConfig();
-  candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD';
+function setConfig(configMongo) {
+  config = configMongo;
 }
 
 module.exports = {
-  connection: wsPublicConnection
+  connection: wsPublicConnection,
+  setConfig
 };

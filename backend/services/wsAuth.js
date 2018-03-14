@@ -2,7 +2,6 @@ const WebSocket = require('ws');
 const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
 const {error} = require('../lib/logger');
-const mongo = require('../lib/mongodb');
 const authFormat = require('./wsFormat').authFormat;
 const services = require('./services');
 
@@ -74,11 +73,12 @@ function newOrder(amount) {
   webSocket.send(order);
 }
 
-function initConfig() {
-  config = mongo.getConfig();
+function setConfig(configMongo) {
+  config = configMongo;
 }
 
 module.exports = {
   connection: wsAuthConnection,
-  newOrder: newOrder
+  newOrder,
+  setConfig
 };
