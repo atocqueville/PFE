@@ -33,7 +33,7 @@ function initConfig(doc) {
 }
 
 module.exports = {
-  init: function () {
+  initConfig: function () {
     return MongoClient.connect(url, options)
       .then(function (client) {
         _db = client.db(dbName);

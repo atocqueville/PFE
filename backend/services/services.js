@@ -4,12 +4,10 @@ const clientTel = require('../lib/twilio');
 const {trades, console2} = require('../lib/logger');
 const wsPublic = require('./wsPublic');
 const wsAuth = require('./wsAuth');
-const wsServer = require('./wsServer');
 const Candle = require('../models/model').candle;
 const twilioConfigSetter = require('../lib/twilio').setConfig;
 const wsAuthConfigSetter = require('./wsAuth').setConfig;
 const wsPublicConfigSetter = require('./wsPublic').setConfig;
-const wsServerConfigSetter = require('./wsServer').setConfig;
 
 let config;
 let derniereLocalCandle = new Candle();
@@ -27,7 +25,6 @@ function startWebsockets() {
   initConfig();
   wsPublic.connection();
   wsAuth.connection();
-  wsServer.init();
 }
 
 function makeDecisions(lastCandle) {
@@ -172,7 +169,6 @@ function initConfig() {
   twilioConfigSetter(config);
   wsPublicConfigSetter(config);
   wsAuthConfigSetter(config);
-  wsServerConfigSetter(config);
 }
 
 module.exports.setStatus = setStatus;

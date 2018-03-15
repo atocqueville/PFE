@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 
 let server = app.listen(3001, async () => {
-  await mongo.init();
+  await mongo.initConfig();
   startServer();
 });
 
@@ -17,16 +17,3 @@ let server = app.listen(3001, async () => {
 //     username: "D0loresH4ze"
 //   }]);
 // });
-//
-// const wss = new wsServer({server});
-// wss.on('connection', (ws) => {
-//   console.log('Client connected');
-//   ws.on('message', (message) => console.log(message));
-//   ws.on('close', () => console.log('Client disconnected'));
-// });
-//
-// setInterval(() => {
-//   wss.clients.forEach((client) => {
-//     client.send(new Date().toTimeString());
-//   });
-// }, 1000);
