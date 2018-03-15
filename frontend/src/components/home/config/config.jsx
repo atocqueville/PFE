@@ -1,7 +1,21 @@
 import React, {Component} from "react";
+import http from 'axios';
 import './config.css';
 
 class Config extends Component {
+  constructor() {
+    super();
+    this.state = {
+      username: ''
+    };
+
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick() {
+    http.get('https://api.github.com/users/atocqueville')
+      .then(response => this.setState({username: response.data.name}))
+  };
 
   render() {
     return (
@@ -49,11 +63,12 @@ class Config extends Component {
               </div>
             </div>
           </form>
+          <p>{this.state.username}</p>
           <br/>
 
           <div className="button-container">
-            <button type="button" className="btn btn-success start-button">Start</button>
-            <button type="button" className="btn btn-danger stop-button">Stop</button>
+            <button type="button" className="btn btn-success start-button" onClick={this.handleClick}>Start</button>
+            <button type="button" className="btn btn-danger stop-button" onClick={this.handleClick}>Stop</button>
           </div>
         </div>
       </div>

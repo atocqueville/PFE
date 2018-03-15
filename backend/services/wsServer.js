@@ -18,7 +18,7 @@ function setConfig(configMongo) {
   config = configMongo;
 }
 
-module.exports = {
-  init: wsServerInit,
-  setConfig
-};
+// module.exports = {
+//   init: wsServerInit,
+//   setConfig
+// };
