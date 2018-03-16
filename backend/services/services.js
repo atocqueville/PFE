@@ -22,7 +22,13 @@ let task = cron.schedule('*/5 * * * * *', function () {
 }, false);
 
 function updateConfig(newConfig) {
-  return mongo.updateConfig(newConfig);
+  /* Update config
+      re-init Config var
+      start websockets
+   */
+  return mongo.updateConfig(newConfig)
+    .then(initConfig())
+    .then(() => console.log('final then'));
 }
 
 function startServer() {
@@ -162,6 +168,7 @@ function updateLocalLastCandle(lastCandle) {
 }
 
 function initConfig() {
+  console.log('init config service');
   config = mongo.getConfig();
   twilioConfigSetter(config);
   wsPublicConfigSetter(config);
