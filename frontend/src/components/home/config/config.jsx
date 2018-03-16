@@ -40,7 +40,7 @@ class Config extends Component {
   startClick() {
     http.post('http://localhost:3000/config', this.state.config)
       .then(response => {
-        console.log(response.data);
+        console.log(response);
       });
   }
 

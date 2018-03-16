@@ -173,6 +173,7 @@ function initConfig() {
   twilioConfigSetter(config);
   wsPublicConfigSetter(config);
   wsAuthConfigSetter(config);
+  console.log('new config', config);
 }
 
 module.exports.startServer = startServer;

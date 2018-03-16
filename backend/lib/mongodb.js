@@ -25,7 +25,7 @@ function initConfig(doc) {
     return doc;
   } else {
     return configCollection.insertOne(config)
-      .then(function (item) {
+      .then(function (item) { // TODO: RETRIEVE CONFIG AND SET VALUE
         config = item.ops[0];
         return item;
       });
@@ -49,8 +49,18 @@ module.exports = {
   },
 
   updateConfig: function (newConfig) {
-    console.log('mongodb');
-    return configCollection.findOne();
+    return configCollection.updateOne({}, {
+      $set: {
+        currency: newConfig.currency,
+        timestamp: newConfig.timestamp,
+        RSIperiod: newConfig.RSIperiod,
+        walletUsed: newConfig.walletUsed,
+        minRSI: newConfig.minRSI,
+        maxRSI: newConfig.maxRSI
+      }
+    }).then((response) => { // TODO: RETRIEVE CONFIG AND SET VALUE ET POURQUOI DESYNCHRO
+      console.log('mongodbbb', response.result)
+    });
   },
 
   getDb: function () {
