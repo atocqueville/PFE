@@ -17,7 +17,7 @@ class Config extends Component {
       }
     };
 
-    this.handleClick = this.handleClick.bind(this);
+    this.startClick = this.startClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -37,9 +37,9 @@ class Config extends Component {
     });
   }
 
-  handleClick() {
-    // http.get('http://localhost:3000/config')
-    //   .then(response => this.setState({username: response.data}))
+  startClick() {
+    http.post('http://localhost:3000/config', this.state.config)
+      .then(response => console.log(response));
   }
 
   render() {
@@ -112,8 +112,8 @@ class Config extends Component {
           <br/>
 
           <div className="button-container">
-            <button type="button" className="btn btn-success start-button" onClick={this.handleClick}>Start</button>
-            <button type="button" className="btn btn-danger stop-button" onClick={this.handleClick}>Stop</button>
+            <button type="button" className="btn btn-success start-button" onClick={this.startClick}>Start</button>
+            <button type="button" className="btn btn-danger stop-button">Stop</button>
           </div>
         </div>
       </div>

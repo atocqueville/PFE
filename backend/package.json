@@ -1,6 +1,6 @@
 {
   "name": "PFE",
-  "version": "2.5.0",
+  "version": "3.1.0",
   "description": "Trading Bot using bitfinex API",
   "main": "index.js",
   "scripts": {
@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/atocqueville/PFE#readme",
   "dependencies": {
+    "body-parser": "^1.18.2",
     "crypto-js": "^3.1.9-1",
     "express": "^4.16.2",
     "log4js": "^2.5.2",

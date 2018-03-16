@@ -14,15 +14,27 @@ let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
 let buy, sell, position;
 let walletUSD, walletCrypto, orderAmount, buyAmount, benef;
-let running = true;
+let running = false;
 
 let task = cron.schedule('*/5 * * * * *', function () {
-  //makeDecisions(derniereLocalCandle.DATA);
-  // console.log(running);
+  // makeDecisions(derniereLocalCandle.DATA);
+  console.log(running);
 }, false);
 
-function startWebsockets() {
+function updateConfig(newConfig) {
+  return mongo.updateConfig(newConfig)
+    .then(response => {
+      setTimeout(function () {
+        console.log('attente');
+      }, 5000);
+    });
+}
+
+function startServer() {
   initConfig();
+}
+
+function startWebsockets() {
   wsPublic.connection();
   wsAuth.connection();
 }
@@ -41,13 +53,6 @@ function makeDecisions(lastCandle) {
       wsAuth.newOrder(orderAmount);
     }
   }
-}
-
-function setStatus(bool) {
-  // if (bool) task.start();
-  // else task.stop();
-  // running = bool;
-  console.log(bool);
 }
 
 function setBuy(price, amountBought) {
@@ -70,9 +75,6 @@ function updateWallet(usd, crypto, init) {
   if (init) {
     // TODO REFACTO OLD BUY
     // if (walletCrypto) buy = Number(fs.readFileSync('./logs/trades.log').toString('utf-8').split('\r\n').reverse()[1].split('$')[1]);
-    if (running) {
-      task.start();
-    }
   }
 }
 
@@ -171,7 +173,8 @@ function initConfig() {
   wsAuthConfigSetter(config);
 }
 
-module.exports.setStatus = setStatus;
+module.exports.startServer = startServer;
+module.exports.updateConfig = updateConfig;
 module.exports.startWebsockets = startWebsockets;
 module.exports.initCandleStack = initCandleStack;
 module.exports.manageCandle = manageCandle;

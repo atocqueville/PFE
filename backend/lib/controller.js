@@ -1,12 +1,14 @@
 'use strict';
 
+const services = require('../services/services');
 const mongo = require('./mongodb');
 
-exports.retrieveConfig = function (req, res) {
-  res.send(mongo.getConfig());
+exports.getConfig = function (req, res) {
+  res.json(mongo.getConfig());
 };
 
-exports.updateConfig = function (req, res) {
+exports.updateConfig = async function (req, res) {
+  await services.updateConfig(req.body);
   res.send('updateconfig');
 };
 
