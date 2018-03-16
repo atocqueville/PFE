@@ -7,9 +7,12 @@ exports.getConfig = function (req, res) {
   res.json(mongo.getConfig());
 };
 
-exports.updateConfig = async function (req, res) {
-  await services.updateConfig(req.body);
-  res.send('updateconfig');
+exports.updateConfig = function (req, res) {
+  services.updateConfig(req.body)
+    .then((function (oldConfig) {
+      console.log('dans le then');
+      return res.send(oldConfig);
+    }));
 };
 
 exports.listAllTrades = function (req, res) {

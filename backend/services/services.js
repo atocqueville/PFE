@@ -4,7 +4,7 @@ const clientTel = require('../lib/twilio');
 const {trades, console2} = require('../lib/logger');
 const wsPublic = require('./wsPublic');
 const wsAuth = require('./wsAuth');
-const Candle = require('../models/model').candle;
+const Candle = require('../model/model').candle;
 const twilioConfigSetter = require('../lib/twilio').setConfig;
 const wsAuthConfigSetter = require('./wsAuth').setConfig;
 const wsPublicConfigSetter = require('./wsPublic').setConfig;
@@ -22,12 +22,7 @@ let task = cron.schedule('*/5 * * * * *', function () {
 }, false);
 
 function updateConfig(newConfig) {
-  return mongo.updateConfig(newConfig)
-    .then(response => {
-      setTimeout(function () {
-        console.log('attente');
-      }, 5000);
-    });
+  return mongo.updateConfig(newConfig);
 }
 
 function startServer() {

@@ -49,6 +49,7 @@ module.exports = {
   },
 
   updateConfig: function (newConfig) {
+    console.log('mongodb');
     return configCollection.findOne();
   },
 
