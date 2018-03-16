@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import {ConfigModel} from './configModel'
 import http from 'axios';
 import './config.css';
 
@@ -6,16 +7,40 @@ class Config extends Component {
   constructor() {
     super();
     this.state = {
-      username: ''
+      config: {
+        currency: '',
+        timestamp: '',
+        RSIperiod: '',
+        walletUsed: '',
+        minRSI: '',
+        maxRSI: ''
+      }
     };
 
     this.handleClick = this.handleClick.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  componentWillMount() {
+    http.get('http://localhost:3000/config')
+      .then(response => this.setState({
+        config: new ConfigModel(response.data)
+      }));
+  }
+
+  handleChange(event) {
+    let id = event.target.id;
+    let value = event.target.value;
+    this.setState((state) => {
+      state.config[id] = value;
+      return state;
+    });
   }
 
   handleClick() {
-    http.get('https://api.github.com/users/atocqueville')
-      .then(response => this.setState({username: response.data.name}))
-  };
+    // http.get('http://localhost:3000/config')
+    //   .then(response => this.setState({username: response.data}))
+  }
 
   render() {
     return (
@@ -26,44 +51,64 @@ class Config extends Component {
           <form>
             <div className="form-row">
               <div className="col">
-                <select className="custom-select mr-sm-2" id="crypto">
-                  <option selected>Crypto</option>
-                  <option value="1">BTC</option>
-                  <option value="2">ETH</option>
-                  <option value="3">XRP</option>
+                <label className="input-label">Currency</label>
+                <select className="custom-select mr-sm-2" id="currency"
+                        value={this.state.config.currency} onChange={this.handleChange}>
+                  <option value="BTC">BTC</option>
+                  <option value="ETH">ETH</option>
+                  <option value="NEO">NEO</option>
+                  <option value="OMG">OMG</option>
+                  <option value="IOT">IOT</option>
+                  <option value="XRP">XRP</option>
                 </select>
               </div>
               <div className="col">
-                <select className="custom-select mr-sm-2" id="period">
-                  <option selected>Period</option>
-                  <option value="1">5mn</option>
-                  <option value="2">15mn</option>
-                  <option value="3">30mn</option>
+                <label className="input-label">Timestamp</label>
+                <select className="custom-select mr-sm-2" id="timestamp"
+                        value={this.state.config.timestamp} onChange={this.handleChange}>
+                  <option value="1">1mn</option>
+                  <option value="5">5mn</option>
+                  <option value="15">15mn</option>
+                  <option value="30">30mn</option>
+                  <option value="60">1h</option>
+                  <option value="180">3h</option>
+                  <option value="360">6h</option>
                 </select>
               </div>
               <div className="col">
-                <select className="custom-select mr-sm-2" id="rsi">
-                  <option selected>RSI</option>
-                  <option value="1">5</option>
-                  <option value="2">9</option>
-                  <option value="3">14</option>
+                <label className="input-label">RSI period</label>
+                <select className="custom-select mr-sm-2" id="RSIperiod"
+                        value={this.state.config.RSIperiod} onChange={this.handleChange}>
+                  <option value="7">7</option>
+                  <option value="8">8</option>
+                  <option value="9">9</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                  <option value="13">13</option>
+                  <option value="14">14</option>
                 </select>
               </div>
             </div>
             <br/>
             <div className="form-row">
               <div className="col">
-                <input type="text" className="form-control" placeholder="Wallet %"/>
+                <label className="input-label">RSI min</label>
+                <input type="text" className="form-control" placeholder="RSI min" id="minRSI"
+                       value={this.state.config.minRSI} onChange={this.handleChange}/>
               </div>
               <div className="col">
-                <input type="text" className="form-control" placeholder="RSI min"/>
+                <label className="input-label">RSI max</label>
+                <input type="text" className="form-control" placeholder="RSI max" id="maxRSI"
+                       value={this.state.config.maxRSI} onChange={this.handleChange}/>
               </div>
               <div className="col">
-                <input type="text" className="form-control" placeholder="RSI max"/>
+                <label className="input-label">Wallet %</label>
+                <input type="text" className="form-control" placeholder="Wallet %" id="walletUsed"
+                       value={this.state.config.walletUsed} onChange={this.handleChange}/>
               </div>
             </div>
           </form>
-          <p>{this.state.username}</p>
           <br/>
 
           <div className="button-container">

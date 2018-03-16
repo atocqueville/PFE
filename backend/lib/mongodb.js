@@ -11,9 +11,9 @@ let options = {
   connectTimeoutMS: 10000
 };
 let config = {
-  RSIperiod: "9",
-  timestamp: "5",
   currency: "BTC",
+  timestamp: "5",
+  RSIperiod: "9",
   walletUsed: "90",
   minRSI: "30",
   maxRSI: "70"

@@ -1,26 +1,15 @@
 'use strict';
 
-exports.list_all_tasks = function (req, res) {
-  Task.find({}, function (err, task) {
-    if (err)
-      res.send(err);
-    res.json(task);
-  });
+const mongo = require('./mongodb');
+
+exports.retrieveConfig = function (req, res) {
+  res.send(mongo.getConfig());
 };
 
-exports.create_a_task = function (req, res) {
-  var new_task = new Task(req.body);
-  new_task.save(function (err, task) {
-    if (err)
-      res.send(err);
-    res.json(task);
-  });
+exports.updateConfig = function (req, res) {
+  res.send('updateconfig');
 };
 
-exports.read_a_task = function (req, res) {
-  Task.findById(req.params.taskId, function (err, task) {
-    if (err)
-      res.send(err);
-    res.json(task);
-  });
+exports.listAllTrades = function (req, res) {
+  res.send('trades');
 };

@@ -6,6 +6,7 @@ const publicFormat = require('./wsFormat').publicFormat;
 let candleKey, channelID, config;
 
 function wsPublicConnection() {
+  candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD'; //TODO: gerer timestamp > 30
   const payload = {
     event: 'subscribe',
     channel: 'candles',
