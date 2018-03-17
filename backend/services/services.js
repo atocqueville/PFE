@@ -14,22 +14,25 @@ let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
 let buy, sell, position;
 let walletUSD, walletCrypto, orderAmount, buyAmount, benef;
-let running = false;
+let status = false;
 
 let task = cron.schedule('*/5 * * * * *', function () {
   // makeDecisions(derniereLocalCandle.DATA);
-  console.log(running);
+  console.log(derniereLocalCandle.DATA.CLOSE);
 }, false);
 
 async function updateConfig(newConfig) {
   await mongo.updateConfig(newConfig);
   initConfig();
   startWebsockets();
+  return status;
 }
 
 function startWebsockets() {
   wsPublic.connection();
   wsAuth.connection();
+  task.start();
+  status = true;
 }
 
 function makeDecisions(lastCandle) {
@@ -159,6 +162,10 @@ function updateLocalLastCandle(lastCandle) {
   derniereLocalCandle.DATE = new Date(derniereLocalCandle.MTS).toLocaleTimeString();
 }
 
+function getStatus() {
+  return status;
+}
+
 function initConfig() {
   config = mongo.getConfig();
   twilioConfigSetter(config);
@@ -173,4 +180,5 @@ module.exports.initCandleStack = initCandleStack;
 module.exports.manageCandle = manageCandle;
 module.exports.updateWallet = updateWallet;
 module.exports.setSell = setSell;
+module.exports.getStatus = getStatus;
 module.exports.setBuy = setBuy;

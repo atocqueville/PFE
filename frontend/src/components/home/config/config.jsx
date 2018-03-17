@@ -23,9 +23,12 @@ class Config extends Component {
 
   componentWillMount() {
     http.get('http://localhost:3000/config')
-      .then(response => this.setState({
-        config: new ConfigModel(response.data)
-      }));
+      .then(response => {
+        console.log(response.headers);
+        this.setState({
+          config: new ConfigModel(response.data)
+        })
+      });
   }
 
   handleChange(event) {
@@ -40,7 +43,7 @@ class Config extends Component {
   startClick() {
     http.post('http://localhost:3000/config', this.state.config)
       .then(response => {
-        console.log(response);
+        console.log(response.headers);
       });
   }
 
