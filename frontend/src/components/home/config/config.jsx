@@ -58,7 +58,7 @@ class Config extends Component {
             <div className="form-row">
               <div className="col">
                 <label className="input-label">Currency</label>
-                <select className="custom-select mr-sm-2" id="currency"
+                <select className="custom-select mr-sm-2" id="currency" disabled={this.state.status}
                         value={this.state.config.currency} onChange={this.handleChange}>
                   <option value="BTC">BTC</option>
                   <option value="ETH">ETH</option>
@@ -70,7 +70,7 @@ class Config extends Component {
               </div>
               <div className="col">
                 <label className="input-label">Timestamp</label>
-                <select className="custom-select mr-sm-2" id="timestamp"
+                <select className="custom-select mr-sm-2" id="timestamp" disabled={this.state.status}
                         value={this.state.config.timestamp} onChange={this.handleChange}>
                   <option value="5">5mn</option>
                   <option value="15">15mn</option>
@@ -82,7 +82,7 @@ class Config extends Component {
               </div>
               <div className="col">
                 <label className="input-label">RSI period</label>
-                <select className="custom-select mr-sm-2" id="RSIperiod"
+                <select className="custom-select mr-sm-2" id="RSIperiod" disabled={this.state.status}
                         value={this.state.config.RSIperiod} onChange={this.handleChange}>
                   <option value="7">7</option>
                   <option value="8">8</option>
@@ -99,18 +99,21 @@ class Config extends Component {
             <div className="form-row">
               <div className="col">
                 <label className="input-label">RSI min</label>
-                <input type="number" className="form-control" placeholder="RSI min" id="minRSI"
-                       value={this.state.config.minRSI} onChange={this.handleChange}/>
+                <input type="text" className="form-control" placeholder="RSI min" id="minRSI"
+                       value={this.state.config.minRSI} onChange={this.handleChange}
+                       disabled={this.state.status}/>
               </div>
               <div className="col">
                 <label className="input-label">RSI max</label>
-                <input type="number" className="form-control" placeholder="RSI max" id="maxRSI"
-                       value={this.state.config.maxRSI} onChange={this.handleChange}/>
+                <input type="text" className="form-control" placeholder="RSI max" id="maxRSI"
+                       value={this.state.config.maxRSI} onChange={this.handleChange}
+                       disabled={this.state.status}/>
               </div>
               <div className="col">
                 <label className="input-label">Wallet %</label>
-                <input type="number" className="form-control" placeholder="Wallet %" id="walletUsed"
-                       value={this.state.config.walletUsed} onChange={this.handleChange}/>
+                <input type="text" className="form-control" placeholder="Wallet %" id="walletUsed"
+                       value={this.state.config.walletUsed} onChange={this.handleChange}
+                       disabled={this.state.status}/>
               </div>
             </div>
           </form>
