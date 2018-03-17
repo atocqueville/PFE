@@ -99,17 +99,17 @@ class Config extends Component {
             <div className="form-row">
               <div className="col">
                 <label className="input-label">RSI min</label>
-                <input type="text" className="form-control" placeholder="RSI min" id="minRSI"
+                <input type="number" className="form-control" placeholder="RSI min" id="minRSI"
                        value={this.state.config.minRSI} onChange={this.handleChange}/>
               </div>
               <div className="col">
                 <label className="input-label">RSI max</label>
-                <input type="text" className="form-control" placeholder="RSI max" id="maxRSI"
+                <input type="number" className="form-control" placeholder="RSI max" id="maxRSI"
                        value={this.state.config.maxRSI} onChange={this.handleChange}/>
               </div>
               <div className="col">
                 <label className="input-label">Wallet %</label>
-                <input type="text" className="form-control" placeholder="Wallet %" id="walletUsed"
+                <input type="number" className="form-control" placeholder="Wallet %" id="walletUsed"
                        value={this.state.config.walletUsed} onChange={this.handleChange}/>
               </div>
             </div>
