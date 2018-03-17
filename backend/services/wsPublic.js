@@ -3,10 +3,11 @@ const services = require('./services');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
-let candleKey, channelID, config;
+let candleKey, channelID, config, timestampFormat;
 
 function wsPublicConnection() {
-  candleKey = 'trade:' + config.timestamp + 'm:t' + config.currency + 'USD'; //TODO: gerer timestamp > 30
+  initTimestamp();
+  candleKey = 'trade:' + timestampFormat + ':t' + config.currency + 'USD';
   const payload = {
     event: 'subscribe',
     channel: 'candles',
@@ -35,6 +36,28 @@ function wsPublicConnection() {
   ws.on('error', (err) => {
     error.warn('[ERROR] - ' + err);
   });
+}
+
+function initTimestamp() {
+  switch (config.timestamp) {
+    case '5':
+      timestampFormat = '5m';
+      break;
+    case '15':
+      timestampFormat = '15m';
+      break;
+    case '30':
+      timestampFormat = '30m';
+      break;
+    case '60':
+      timestampFormat = '1h';
+      break;
+    case '180':
+      timestampFormat = '3h';
+      break;
+    case '360':
+      timestampFormat = '6h';
+  }
 }
 
 function setConfig(configMongo) {

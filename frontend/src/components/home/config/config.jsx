@@ -68,7 +68,6 @@ class Config extends Component {
                 <label className="input-label">Timestamp</label>
                 <select className="custom-select mr-sm-2" id="timestamp"
                         value={this.state.config.timestamp} onChange={this.handleChange}>
-                  <option value="1">1mn</option>
                   <option value="5">5mn</option>
                   <option value="15">15mn</option>
                   <option value="30">30mn</option>

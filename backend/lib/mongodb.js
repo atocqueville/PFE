@@ -58,9 +58,8 @@ module.exports = {
         minRSI: newConfig.minRSI,
         maxRSI: newConfig.maxRSI
       }
-    }).then((response) => { // TODO: RETRIEVE CONFIG AND SET VALUE ET POURQUOI DESYNCHRO
-      console.log('mongodbbb', response.result)
-    });
+    }).then(() => configCollection.findOne())
+      .then((doc) => config = doc);
   },
 
   getDb: function () {

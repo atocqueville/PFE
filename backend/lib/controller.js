@@ -10,7 +10,6 @@ exports.getConfig = function (req, res) {
 exports.updateConfig = function (req, res) {
   services.updateConfig(req.body)
     .then((function (oldConfig) {
-      console.log('dans le then');
       return res.send(oldConfig);
     }));
 };

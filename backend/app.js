@@ -1,7 +1,7 @@
 const mongo = require('./lib/mongodb');
 const express = require('express');
 const app = express();
-const startServer = require('./services/services').startServer;
+const startServer = require('./services/services').initConfig;
 const routes = require('./lib/routes');
 
 routes(app);
