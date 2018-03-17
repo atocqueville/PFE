@@ -14,7 +14,8 @@ class Config extends Component {
         walletUsed: '',
         minRSI: '',
         maxRSI: ''
-      }
+      },
+      status: false
     };
 
     this.startClick = this.startClick.bind(this);
@@ -23,18 +24,16 @@ class Config extends Component {
 
   componentWillMount() {
     http.get('http://localhost:3000/config')
-      .then(response => {
-        console.log(response.headers);
-        this.setState({
-          config: new ConfigModel(response.data)
-        })
-      });
+      .then(response => this.setState({
+        config: new ConfigModel(response.data),
+        status: response.headers.status === 'true'
+      }));
   }
 
   handleChange(event) {
     let id = event.target.id;
     let value = event.target.value;
-    this.setState((state) => {
+    this.setState(state => {
       state.config[id] = value;
       return state;
     });
@@ -43,7 +42,9 @@ class Config extends Component {
   startClick() {
     http.post('http://localhost:3000/config', this.state.config)
       .then(response => {
-        console.log(response.headers);
+        this.setState({
+          status: response.headers.status === 'true'
+        })
       });
   }
 
@@ -116,8 +117,12 @@ class Config extends Component {
           <br/>
 
           <div className="button-container">
-            <button type="button" className="btn btn-success start-button" onClick={this.startClick}>Start</button>
-            <button type="button" className="btn btn-danger stop-button">Stop</button>
+            <button type="button" className="btn btn-success start-button"
+                    disabled={this.state.status} onClick={this.startClick}>Start
+            </button>
+            <button type="button" className="btn btn-danger stop-button"
+                    disabled={!this.state.status}>Stop
+            </button>
           </div>
         </div>
       </div>
