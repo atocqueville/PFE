@@ -19,6 +19,7 @@ class Config extends Component {
     };
 
     this.startClick = this.startClick.bind(this);
+    this.stopClick = this.stopClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -40,12 +41,19 @@ class Config extends Component {
   }
 
   startClick() {
-    http.post('http://localhost:3000/config', this.state.config)
+    http.post('http://localhost:3000/config/status', this.state.config)
       .then(response => {
         this.setState({
           status: response.headers.status === 'true'
         })
       });
+  }
+
+  stopClick() {
+    http.get('http://localhost:3000/config/status')
+      .then(response => this.setState({
+        status: response.headers.status === 'true'
+      }));
   }
 
   render() {
@@ -124,7 +132,7 @@ class Config extends Component {
                     disabled={this.state.status} onClick={this.startClick}>Start
             </button>
             <button type="button" className="btn btn-danger stop-button"
-                    disabled={!this.state.status}>Stop
+                    disabled={!this.state.status} onClick={this.stopClick}>Stop
             </button>
           </div>
         </div>

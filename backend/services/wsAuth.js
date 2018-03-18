@@ -7,7 +7,7 @@ const services = require('./services');
 
 let apiKey = apiKeys.public;
 let walletUSD, walletCrypto;
-let webSocket;
+let ws;
 let config;
 
 function wsAuthConnection() {
@@ -24,8 +24,7 @@ function wsAuthConnection() {
     event: 'auth',
     filter: ['wallet', 'trading']
   };
-  const ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
-  webSocket = ws;
+  ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
 
   ws.on('open', () => ws.send(JSON.stringify(payload)));
   ws.on('message', (message) => {
@@ -50,8 +49,10 @@ function wsAuthConnection() {
     }
   });
   ws.on('close', (res) => {
+    if (res !== 1005) {
+      setTimeout(() => wsAuthConnection(), 1000);
+    }
     error.info('[CLOSED] - ' + res);
-    setTimeout(() => wsAuthConnection(), 1000);
   });
   ws.on('error', (err) => {
     error.info('[ERROR] - ' + err);
@@ -69,7 +70,11 @@ function newOrder(amount) {
       hidden: 0,
     }
   ]);
-  webSocket.send(order);
+  ws.send(order);
+}
+
+function closeWebsocket() {
+  ws.close();
 }
 
 function setConfig(configMongo) {
@@ -78,6 +83,7 @@ function setConfig(configMongo) {
 
 module.exports = {
   connection: wsAuthConnection,
+  closeWebsocket,
   newOrder,
   setConfig
 };

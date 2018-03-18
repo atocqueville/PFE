@@ -3,7 +3,7 @@ const services = require('./services');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
-let candleKey, channelID, config, timestampFormat;
+let candleKey, channelID, config, timestampFormat, ws;
 
 function wsPublicConnection() {
   initTimestamp();
@@ -13,7 +13,7 @@ function wsPublicConnection() {
     channel: 'candles',
     key: candleKey
   };
-  const ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
+  ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
 
   ws.on('open', () => ws.send(JSON.stringify(payload)));
   ws.on('message', (message) => {
@@ -30,8 +30,10 @@ function wsPublicConnection() {
     }
   });
   ws.on('close', (res) => {
+    if (res !== 1005) {
+      setTimeout(() => wsPublicConnection(), 1000);
+    }
     error.info('[CLOSED] - ' + res);
-    setTimeout(() => wsPublicConnection(), 1000);
   });
   ws.on('error', (err) => {
     error.warn('[ERROR] - ' + err);
@@ -60,11 +62,16 @@ function initTimestamp() {
   }
 }
 
+function closeWebsocket() {
+  ws.close();
+}
+
 function setConfig(configMongo) {
   config = configMongo;
 }
 
 module.exports = {
   connection: wsPublicConnection,
+  closeWebsocket,
   setConfig
 };

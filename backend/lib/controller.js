@@ -7,10 +7,15 @@ exports.getConfig = function (req, res) {
   res.set('status', services.getStatus()).json(mongo.getConfig());
 };
 
-exports.updateConfig = function (req, res) {
+exports.start = function (req, res) {
   services.updateConfig(req.body)
     .then((running) => res.set('status', running).send('ok'))
-    .catch(() => res.send('nope'));
+    .catch(() => res.set('status', false).send('nope'));
+};
+
+exports.stop = function (req, res) {
+  services.stopWebsockets();
+  res.set('status', services.getStatus()).send('stop');
 };
 
 exports.listAllTrades = function (req, res) {

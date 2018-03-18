@@ -35,6 +35,13 @@ function startWebsockets() {
   status = true;
 }
 
+function stopWebsockets() {
+  wsPublic.closeWebsocket();
+  wsAuth.closeWebsocket();
+  task.stop();
+  status = false;
+}
+
 function makeDecisions(lastCandle) {
   if (!position) {
     if (lastCandle.RSI < config.minRSI) {
@@ -176,6 +183,7 @@ function initConfig() {
 module.exports.initConfig = initConfig;
 module.exports.updateConfig = updateConfig;
 module.exports.startWebsockets = startWebsockets;
+module.exports.stopWebsockets = stopWebsockets;
 module.exports.initCandleStack = initCandleStack;
 module.exports.manageCandle = manageCandle;
 module.exports.updateWallet = updateWallet;
