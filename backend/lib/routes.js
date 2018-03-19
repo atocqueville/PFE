@@ -10,6 +10,9 @@ module.exports = function (app) {
   app.route('/config')
     .get(controller.getConfig);
 
+  app.route('/history')
+    .get(controller.getHistory);
+
   app.route('/config/status')
     .get(controller.stop)
     .post(controller.start);

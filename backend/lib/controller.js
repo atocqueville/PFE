@@ -7,6 +7,12 @@ exports.getConfig = function (req, res) {
   res.set('status', services.getStatus()).json(mongo.getConfig());
 };
 
+exports.getHistory = function (req, res) {
+  mongo.getHistory()
+    .then((history) => res.json(history))
+    .catch(() => res.send('historyFetchFailed'));
+};
+
 exports.start = function (req, res) {
   services.updateConfig(req.body)
     .then((running) => res.set('status', running).send('ok'))

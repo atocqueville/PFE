@@ -4,7 +4,8 @@ const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb://localhost:27017/botrsi';
 const dbName = 'botrsi';
-let _db, configCollection;
+let cursor;
+let _db, configCollection, historyCollection;
 let options = {
   keepAlive: 1,
   socketTimeoutMS: 10000,
@@ -17,6 +18,14 @@ let config = {
   walletUsed: "90",
   minRSI: "30",
   maxRSI: "70"
+};
+
+let historyFaked = {
+  type: "SELL",
+  crypto: "BTC",
+  value: "9700",
+  amount: "0.9",
+  date: new Date().toISOString()
 };
 
 function initConfig(doc) {
@@ -60,6 +69,19 @@ module.exports = {
       }
     }).then(() => configCollection.findOne())
       .then((doc) => config = doc);
+  },
+
+  getHistory: function () {
+    return _db.collection('history').find({}).toArray();
+  },
+
+
+  insertHistory: function () {
+    historyCollection = _db.collection('history');
+    historyCollection.insertOne(historyFaked)
+      .then(function (item) {
+        console.log(item);
+      });
   },
 
   getDb: function () {
