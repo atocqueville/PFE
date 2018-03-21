@@ -17,6 +17,9 @@ module.exports = function (app) {
     .get(controller.stop)
     .post(controller.start);
 
+  app.route('/wallet')
+    .get(controller.getWallet);
+
   app.route('/stats')
     .get(controller.listAllTrades);
 };

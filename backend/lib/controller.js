@@ -13,6 +13,12 @@ exports.getHistory = function (req, res) {
     .catch(() => res.send('historyFetchFailed'));
 };
 
+exports.getWallet = function (req, res) {
+  mongo.getWallet()
+    .then((wallet) => res.json(wallet))
+    .catch(() => res.send('walletFetchFailed'));
+};
+
 exports.start = function (req, res) {
   services.updateConfig(req.body)
     .then((running) => res.set('status', running).send('ok'))

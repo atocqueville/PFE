@@ -1,11 +1,8 @@
-'use strict';
-
 const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb://localhost:27017/botrsi';
 const dbName = 'botrsi';
-let cursor;
-let _db, configCollection, historyCollection;
+let _db, configCollection, historyCollection, walletCollection;
 let options = {
   keepAlive: 1,
   socketTimeoutMS: 10000,
@@ -20,12 +17,17 @@ let config = {
   maxRSI: "70"
 };
 
+let walletFaked = {
+  balance: "1000",
+  date: new Date().toLocaleDateString()
+};
+
 let historyFaked = {
   type: "SELL",
   crypto: "BTC",
   value: "9700",
   amount: "0.9",
-  date: new Date().toISOString()
+  date: new Date().toLocaleString()
 };
 
 function initConfig(doc) {
@@ -75,10 +77,21 @@ module.exports = {
     return _db.collection('history').find({}).toArray();
   },
 
+  getWallet: function () {
+    return _db.collection('wallet').find({}).toArray();
+  },
 
   insertHistory: function () {
     historyCollection = _db.collection('history');
     historyCollection.insertOne(historyFaked)
+      .then(function (item) {
+        console.log(item);
+      });
+  },
+
+  insertWallet: function () {
+    walletCollection = _db.collection('wallet');
+    walletCollection.insertOne(walletFaked)
       .then(function (item) {
         console.log(item);
       });

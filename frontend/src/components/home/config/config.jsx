@@ -1,34 +1,18 @@
 import React, {Component} from "react";
-import {ConfigModel} from './configModel'
 import http from 'axios';
 import './config.css';
 
 class Config extends Component {
-  constructor() {
+  constructor(props) {
     super();
-    this.state = {
-      config: {
-        currency: '',
-        timestamp: '',
-        RSIperiod: '',
-        walletUsed: '',
-        minRSI: '',
-        maxRSI: ''
-      },
-      status: false
-    };
 
+    this.state = {
+      config: props.config,
+      status: props.status
+    };
     this.startClick = this.startClick.bind(this);
     this.stopClick = this.stopClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
-  }
-
-  componentWillMount() {
-    http.get('http://localhost:3000/config')
-      .then(response => this.setState({
-        config: new ConfigModel(response.data),
-        status: response.headers.status === 'true'
-      }));
   }
 
   handleChange(event) {
@@ -61,7 +45,6 @@ class Config extends Component {
       <div className="card border-secondary mb-3">
         <h5 className="card-header">Config</h5>
         <div className="card-body">
-
           <form>
             <div className="form-row">
               <div className="col">
@@ -126,7 +109,6 @@ class Config extends Component {
             </div>
           </form>
           <br/>
-
           <div className="button-container">
             <button type="button" className="btn btn-success start-button"
                     disabled={this.state.status} onClick={this.startClick}>Start
