@@ -38,10 +38,7 @@ class Chart extends Component {
             borderColor: 'rgba(0,0,0,0.8)',
             borderCapStyle: 'butt',
             borderJoinStyle: 'round',
-            pointBackgroundColor: '#fff',
-            legend: {
-              display: false
-            }
+            pointBackgroundColor: '#fff'
           }
         ]
       }
@@ -62,11 +59,10 @@ class Chart extends Component {
         < Line
           data={this.state.chartData}
           options={{
-            legend: {
-              display: false
-            }
+            maintainAspectRatio: false,
+            legend: {display: false}
           }}
-          width={300}
+          height={500}
         />
       </div>
     ) : (
