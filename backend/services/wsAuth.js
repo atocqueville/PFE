@@ -3,7 +3,7 @@ const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
 const {error} = require('../lib/logger');
 const authFormat = require('./wsFormat').authFormat;
-const services = require('./services');
+const services = require('./index');
 
 let apiKey = apiKeys.public;
 let walletUSD, walletCrypto;

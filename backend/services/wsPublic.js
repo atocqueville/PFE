@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const services = require('./services');
+const candleCalc = require('./candleCalc');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
@@ -23,9 +23,9 @@ function wsPublicConnection() {
       channelID = msg.chanId;
     } else if (msg.length && msg.length > 1 && msg[1] !== 'hb') {
       if (msg[1][0].length > 1) {
-        services.initCandleStack(msg[1]);
+        candleCalc.initCandles(msg[1]);
       } else if (msg.length && msg.length > 1 && msg[0] === channelID) {
-        services.manageCandle(msg[1]);
+        candleCalc.manageCandle(msg[1]);
       }
     }
   });

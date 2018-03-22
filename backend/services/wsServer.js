@@ -1,6 +1,5 @@
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({port: 40510});
-let services = require('./services');
 
 let config;
 

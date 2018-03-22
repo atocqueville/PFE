@@ -1,6 +1,6 @@
 'use strict';
 
-const services = require('../services/services');
+const services = require('../services/index');
 const mongo = require('./mongodb');
 
 exports.getConfig = function (req, res) {
