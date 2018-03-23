@@ -20,15 +20,11 @@ let task = cron.schedule('*/5 * * * * *', function () {
 function startWebsockets() {
   wsPublic.connection();
   wsAuth.connection();
-  task.start();
-  status = true;
 }
 
 function stopWebsockets() {
   wsPublic.closeWebsocket();
   wsAuth.closeWebsocket();
-  task.stop();
-  status = false;
 }
 
 function makeDecisions(lastCandle) {
@@ -65,7 +61,17 @@ function initMongoFetch() {
   wsAuthConfigSetter(config);
   candleCalcSetter(config);
   localWalletSetter();
-  // startWebsockets();
+}
+
+function taskStopStart(bool) {
+  if (bool) {
+    task.start();
+    status = true;
+  }
+  else if (!bool) {
+    task.stop();
+    status = false;
+  }
 }
 
 function getStatus() {
@@ -85,6 +91,7 @@ module.exports.stopWebsockets = stopWebsockets;
 module.exports.updateWallet = updateWallet;
 module.exports.updateConfig = updateConfig;
 module.exports.initMongoFetch = initMongoFetch;
+module.exports.taskStopStart = taskStopStart;
 module.exports.getStatus = getStatus;
 module.exports.setAvantDerniereCandle = setAvantDerniereCandle;
 module.exports.setDerniereCandle = setDerniereCandle;

@@ -1,5 +1,6 @@
 const WebSocket = require('ws');
 const candleCalc = require('./candleCalc');
+const services = require('./index');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
@@ -15,7 +16,10 @@ function wsPublicConnection() {
   };
   ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
 
-  ws.on('open', () => ws.send(JSON.stringify(payload)));
+  ws.on('open', () => {
+    ws.send(JSON.stringify(payload));
+    services.taskStopStart(true);
+  });
   ws.on('message', (message) => {
     let msg = publicFormat(JSON.parse(message));
     // console.log(msg);
@@ -33,6 +37,7 @@ function wsPublicConnection() {
     if (res !== 1005) {
       setTimeout(() => wsPublicConnection(), 1000);
     }
+    services.taskStopStart(false);
     error.info('[CLOSED] - ' + res);
   });
   ws.on('error', (err) => {
