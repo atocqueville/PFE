@@ -35,18 +35,17 @@ function wsAuthConnection() {
         if (wallet[0] === 'exchange' && wallet[1] === config.currency) walletCrypto = wallet[2];
         if (wallet[0] === 'exchange' && wallet[1] === 'USD') walletUSD = wallet[2];
       });
-      services.updateWallet(walletUSD, walletCrypto, true);
     } else if (msg[1] === 'wu') {
       if (msg[2][0] === 'exchange' && msg[2][1] === 'USD') {
         walletUSD = msg[2][2];
       } else if (msg[2][0] === 'exchange' && msg[2][1] === config.currency) {
         walletCrypto = msg[2][2];
       }
-      services.updateWallet(walletUSD, walletCrypto, false);
     } else if (msg[1] === 'te') {
-      if (msg[2][4] > 0) services.setBuy(msg[2][5], msg[2][4]);
-      if (msg[2][4] < 0) services.setSell(msg[2][5], msg[2][4]);
+      if (msg[2][4] > 0) services.setBuy(msg[2][5]);
+      if (msg[2][4] < 0) services.setSell(msg[2][5]);
     }
+    services.updateWallet(walletUSD, walletCrypto);
   });
   ws.on('close', (res) => {
     if (res !== 1005) {

@@ -46,17 +46,15 @@ function initConfig(doc) {
 module.exports = {
   init: function () {
     return MongoClient.connect(url, options)
-      .then(function (client) {
+      .then(client => {
         _db = client.db(dbName);
         configCollection = _db.collection('config');
         return configCollection.findOne();
       })
-      .then(function (doc) {
+      .then(doc => {
         return initConfig(doc);
       })
-      .catch((err) => {
-        console.log(err);
-      });
+      .catch(err => console.log(err));
   },
 
   updateConfig: function (newConfig) {
@@ -77,24 +75,28 @@ module.exports = {
     return _db.collection('history').find({}).toArray();
   },
 
+  getLastTrade: function () {
+    return _db.collection('history').find({}).limit(1).sort({$natural: -1}).toArray();
+  },
+
   getWallet: function () {
     return _db.collection('wallet').find({}).toArray();
+  },
+
+  getLastWallet: function () {
+    return _db.collection('wallet').find({}).limit(1).sort({$natural: -1}).toArray();
   },
 
   insertHistory: function () {
     historyCollection = _db.collection('history');
     historyCollection.insertOne(historyFaked)
-      .then(function (item) {
-        console.log(item);
-      });
+      .then(item => console.log(item));
   },
 
   insertWallet: function () {
     walletCollection = _db.collection('wallet');
     walletCollection.insertOne(walletFaked)
-      .then(function (item) {
-        console.log(item);
-      });
+      .then(item => console.log(item));
   },
 
   getDb: function () {
