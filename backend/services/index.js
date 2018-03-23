@@ -9,24 +9,14 @@ const wsAuthConfigSetter = require('./wsAuth').setConfig;
 const wsPublicConfigSetter = require('./wsPublic').setConfig;
 const candleCalcSetter = require('./candleCalc').setConfig;
 
-let config;
-let derniereLocalCandle;
-let avantDerniereLocalCandle;
-let buy, sell, position;
-let walletUSD, walletCrypto, orderAmount, buyAmount, benef;
+let config, derniereLocalCandle, avantDerniereLocalCandle, buy, sell;
+let walletUSD, walletCrypto, orderAmount, buyAmount, benef, position;
 let status = false;
 
 let task = cron.schedule('*/5 * * * * *', function () {
   // makeDecisions(derniereLocalCandle.DATA);
   console.log(derniereLocalCandle.DATA.CLOSE);
 }, false);
-
-async function updateConfig(newConfig) {
-  await mongo.updateConfig(newConfig);
-  initConfig();
-  startWebsockets();
-  return status;
-}
 
 function startWebsockets() {
   wsPublic.connection();
@@ -81,6 +71,22 @@ function updateWallet(usd, crypto, init) {
   }
 }
 
+async function updateConfig(newConfig) {
+  await mongo.updateConfig(newConfig);
+  initConfig();
+  startWebsockets();
+  return status;
+}
+
+function initConfig() {
+  config = mongo.getConfig();
+  twilioConfigSetter(config);
+  wsPublicConfigSetter(config);
+  wsAuthConfigSetter(config);
+  candleCalcSetter(config);
+  startWebsockets();
+}
+
 function getStatus() {
   return status;
 }
@@ -91,15 +97,6 @@ function setAvantDerniereCandle(candle) {
 
 function setDerniereCandle(candle) {
   derniereLocalCandle = candle;
-}
-
-function initConfig() {
-  config = mongo.getConfig();
-  twilioConfigSetter(config);
-  wsPublicConfigSetter(config);
-  wsAuthConfigSetter(config);
-  candleCalcSetter(config);
-  startWebsockets();
 }
 
 module.exports.initConfig = initConfig;
