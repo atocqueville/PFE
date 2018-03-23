@@ -36,7 +36,7 @@ function initConfig(doc) {
     return doc;
   } else {
     return configCollection.insertOne(config)
-      .then(function (item) { // TODO: RETRIEVE CONFIG AND SET VALUE
+      .then(item => { // TODO: RETRIEVE CONFIG AND SET VALUE
         config = item.ops[0];
         return item;
       });
@@ -68,7 +68,7 @@ module.exports = {
         maxRSI: newConfig.maxRSI
       }
     }).then(() => configCollection.findOne())
-      .then((doc) => config = doc);
+      .then(doc => config = doc);
   },
 
   getHistory: function () {

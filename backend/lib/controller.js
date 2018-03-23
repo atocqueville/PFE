@@ -9,19 +9,19 @@ exports.getConfig = function (req, res) {
 
 exports.getHistory = function (req, res) {
   mongo.getHistory()
-    .then((history) => res.json(history))
+    .then(history => res.json(history))
     .catch(() => res.send('historyFetchFailed'));
 };
 
 exports.getWallet = function (req, res) {
   mongo.getWallet()
-    .then((wallet) => res.json(wallet))
+    .then(wallet => res.json(wallet))
     .catch(() => res.send('walletFetchFailed'));
 };
 
 exports.start = function (req, res) {
   services.updateConfig(req.body)
-    .then((running) => res.set('status', running).send('ok'))
+    .then(running => res.set('status', running).send('ok'))
     .catch(() => res.set('status', false).send('nope'));
 };
 
