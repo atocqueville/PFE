@@ -8,23 +8,25 @@ const wsPublicConfigSetter = require('./wsPublic').setConfig;
 const candleCalcSetter = require('./candleCalc').setConfig;
 const localWalletSetter = require('./walletAndTrades').setWalletAndLastTrade;
 
-let config, derniereLocalCandle, avantDerniereLocalCandle;
+let config, derniereLocalCandle;
 let walletUSD, walletCrypto, orderAmount, position;
 let status = false;
 
 let task = cron.schedule('*/5 * * * * *', function () {
   // makeDecisions(derniereLocalCandle.DATA);
-  console.log(derniereLocalCandle.DATA.CLOSE);
+  // console.log(derniereLocalCandle.DATA.CLOSE);
 }, false);
 
 function startWebsockets() {
   wsPublic.connection();
   wsAuth.connection();
+  status = true;
 }
 
 function stopWebsockets() {
   wsPublic.closeWebsocket();
   wsAuth.closeWebsocket();
+  status = false;
 }
 
 function makeDecisions(lastCandle) {
@@ -64,22 +66,13 @@ function initMongoFetch() {
 }
 
 function taskStopStart(bool) {
-  if (bool) {
-    task.start();
-    status = true;
-  }
-  else if (!bool) {
-    task.stop();
-    status = false;
-  }
+  //TODO refacto start/stop
+  if (bool) task.start();
+  else if (!bool) task.stop();
 }
 
 function getStatus() {
   return status;
-}
-
-function setAvantDerniereCandle(candle) {
-  avantDerniereLocalCandle = candle;
 }
 
 function setDerniereCandle(candle) {
@@ -93,5 +86,4 @@ module.exports.updateConfig = updateConfig;
 module.exports.initMongoFetch = initMongoFetch;
 module.exports.taskStopStart = taskStopStart;
 module.exports.getStatus = getStatus;
-module.exports.setAvantDerniereCandle = setAvantDerniereCandle;
 module.exports.setDerniereCandle = setDerniereCandle;

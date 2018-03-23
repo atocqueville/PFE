@@ -56,7 +56,6 @@ function initCandleStack(previousCandles) {
     derniereLocalCandle.DATA = candle;
     derniereLocalCandle.DATE = candlesJSON[i].DATE;
   }
-  services.setAvantDerniereCandle(avantDerniereLocalCandle);
   services.setDerniereCandle(derniereLocalCandle);
   return candlesJSON;
 }
@@ -77,7 +76,6 @@ function updateCandle(lastCandle) {
   }
   derniereLocalCandle.DATA.RSI = 100 - (100 / (1 + (derniereLocalCandle.DATA.AVGGAIN / derniereLocalCandle.DATA.AVGLOSS)));
   derniereLocalCandle.DATE = new Date(derniereLocalCandle.MTS).toLocaleTimeString();
-  services.setAvantDerniereCandle(avantDerniereLocalCandle);
   services.setDerniereCandle(derniereLocalCandle);
 }
 
