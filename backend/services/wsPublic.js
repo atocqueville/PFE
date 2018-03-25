@@ -2,17 +2,17 @@ const WebSocket = require('ws');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
-let candleKey, channelID, config, timestampFormat, ws;
+let config, channelID;
 
 function wsPublicConnection() {
-  initTimestamp();
-  candleKey = 'trade:' + timestampFormat + ':t' + config.currency + 'USD';
+  let timestampFormat = initTimestamp();
+  let candleKey = 'trade:' + timestampFormat + ':t' + config.currency + 'USD';
   const payload = {
     event: 'subscribe',
     channel: 'candles',
     key: candleKey
   };
-  ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
+  let ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
 
   ws.on('open', () => {
     ws.send(JSON.stringify(payload));
@@ -46,22 +46,17 @@ function wsPublicConnection() {
 function initTimestamp() {
   switch (config.timestamp) {
     case '5':
-      timestampFormat = '5m';
-      break;
+      return '5m';
     case '15':
-      timestampFormat = '15m';
-      break;
+      return '15m';
     case '30':
-      timestampFormat = '30m';
-      break;
+      return '30m';
     case '60':
-      timestampFormat = '1h';
-      break;
+      return '1h';
     case '180':
-      timestampFormat = '3h';
-      break;
+      return '3h';
     case '360':
-      timestampFormat = '6h';
+      return '6h';
   }
 }
 

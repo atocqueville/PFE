@@ -5,7 +5,7 @@ const {error} = require('../lib/logger');
 const authFormat = require('./wsFormat').authFormat;
 
 let apiKey = apiKeys.public;
-let walletUSD = 0, walletCrypto = 0, ws, config;
+let walletUSD = 0, walletCrypto = 0, config;
 
 function wsAuthConnection() {
   const authNonce = Date.now() * 1000;
@@ -21,7 +21,7 @@ function wsAuthConnection() {
     event: 'auth',
     filter: ['wallet', 'trading']
   };
-  ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
+  let ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
 
   ws.on('open', () => ws.send(JSON.stringify(payload)));
   ws.on('message', (message) => {
@@ -41,8 +41,11 @@ function wsAuthConnection() {
       }
       walletModule.updateWallet(walletUSD, walletCrypto);
     } else if (msg[1] === 'te') {
+      console.log(msg);
       if (msg[2][4] > 0) walletModule.setBuy(msg[2]);
       if (msg[2][4] < 0) walletModule.setSell(msg[2]);
+    } else if (msg[1] === 'tu') {
+      console.log(msg);
     }
   });
   ws.on('close', (res) => {

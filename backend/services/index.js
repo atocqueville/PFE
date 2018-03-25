@@ -5,7 +5,7 @@ const wsPublic = require('./wsPublic');
 const twilioConfigSetter = require('../lib/twilio').setConfig;
 const wsAuthConfigSetter = require('./wsAuth').setConfig;
 const wsPublicConfigSetter = require('./wsPublic').setConfig;
-const candleCalcSetter = require('./candleCalc').setConfig;
+const candleCalcConfigSetter = require('./candleCalc').setConfig;
 const walletModule = require('./walletAndTrades');
 
 let config, status = false;
@@ -38,9 +38,9 @@ function initMongoFetch() {
   twilioConfigSetter(config);
   wsPublicConfigSetter(config);
   wsAuthConfigSetter(config);
-  candleCalcSetter(config);
+  candleCalcConfigSetter(config);
   walletModule.setConfig(config);
-  walletModule.setLastTrade();
+  walletModule.setPreviousData();
 }
 
 function taskStopStart(bool) {

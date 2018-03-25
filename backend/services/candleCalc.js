@@ -21,7 +21,7 @@ function updateCandle(lastCandle) {
   }
   derniereLocalCandle.DATA.RSI = 100 - (100 / (1 + (derniereLocalCandle.DATA.AVGGAIN / derniereLocalCandle.DATA.AVGLOSS)));
   derniereLocalCandle.DATE = new Date(derniereLocalCandle.MTS).toLocaleTimeString();
-  walletModule.setDerniereCandle(derniereLocalCandle);
+  walletModule.setLastCandle(derniereLocalCandle);
 }
 
 module.exports = {
@@ -78,7 +78,7 @@ module.exports = {
       derniereLocalCandle.DATA = candle;
       derniereLocalCandle.DATE = candlesJSON[i].DATE;
     }
-    walletModule.setDerniereCandle(derniereLocalCandle);
+    walletModule.setLastCandle(derniereLocalCandle);
     return candlesJSON;
   },
 

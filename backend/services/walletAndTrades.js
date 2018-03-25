@@ -4,15 +4,15 @@ const clientTel = require('../lib/twilio');
 const {trades} = require('../lib/logger');
 const {Trade} = require('../model/model');
 
-let derniereLocalCandle, config, tradeMongo, buy, sell, walletUSD, walletCrypto, orderAmount, position = false;
+let lastCandle, config, tradeMongo, walletUSD, walletCrypto, previousTrade, position = false;
 
 module.exports = {
-  setLastTrade: function () {
+  setPreviousData: function () {
     mongo.getLastTrade()
       .then(trade => {
         if (trade.length) {
           if (trade[0].type === 'Buy') {
-            buy = trade[0].value;
+            previousTrade = trade[0];
             position = true;
           }
         }
@@ -22,13 +22,13 @@ module.exports = {
 
   makeDecisions: function () {
     if (!position) {
-      if (derniereLocalCandle.DATA.RSI < config.minRSI) {
-        orderAmount = ((walletUSD / derniereLocalCandle.DATA.CLOSE) * (Number(config.walletUsed) / 100)).toString();
+      if (lastCandle.DATA.RSI < config.minRSI) {
+        let orderAmount = ((walletUSD / lastCandle.DATA.CLOSE) * (Number(config.walletUsed) / 100)).toString();
         wsAuth.newOrder(orderAmount);
       }
     } else if (position) {
-      if (derniereLocalCandle.DATA.RSI > config.maxRSI) {
-        orderAmount = (-1 * walletCrypto).toString();
+      if (lastCandle.DATA.RSI > config.maxRSI) {
+        let orderAmount = (-1 * walletCrypto).toString();
         wsAuth.newOrder(orderAmount);
       }
     }
@@ -39,25 +39,24 @@ module.exports = {
     walletCrypto = crypto;
   },
 
-  setDerniereCandle: function (candle) {
-    derniereLocalCandle = candle;
+  setLastCandle: function (candle) {
+    lastCandle = candle;
   },
 
   setBuy: function (trade) {
     tradeMongo = new Trade('Buy', config.currency, trade[5], trade[4], trade[2]);
     mongo.insertHistory(tradeMongo);
-    buy = trade[5];
+    previousTrade = tradeMongo;
     position = true;
-    trades.info(`Achat au prix de : ${buy}$`);
+    trades.info(`Achat au prix de : ${trade[5]}$`);
   },
 
   setSell: function (trade) {
     tradeMongo = new Trade('Sell', config.currency, trade[5], trade[4], trade[2]);
     mongo.insertHistory(tradeMongo);
-    sell = trade[5];
     position = false;
-    trades.info(`Vente au prix de: ${sell}$ \n`);
-    clientTel.sendSMS(buy, sell);
+    trades.info(`Vente au prix de: ${trade[5]}$ \n`);
+    clientTel.sendSMS(previousTrade, tradeMongo);
   },
 
   setConfig: function (configMongo) {
