@@ -2,7 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb://localhost:27017/botrsi';
 const dbName = 'botrsi';
-let _db, configCollection, historyCollection, walletCollection;
+let _db, configCollection;
 let options = {
   keepAlive: 1,
   socketTimeoutMS: 5000,
@@ -59,8 +59,7 @@ module.exports = {
   },
 
   insertHistory: function (trade) {
-    historyCollection = _db.collection('history');
-    historyCollection.insertOne(trade)
+    _db.collection('history').insertOne(trade)
       .catch(err => console.log(err));
   },
 
@@ -76,10 +75,9 @@ module.exports = {
     return _db.collection('history').find({}).limit(1).sort({$natural: -1}).toArray();
   },
 
-  insertWallet: function () {
-    walletCollection = _db.collection('wallet');
-    walletCollection.insertOne(walletFaked)
-      .then(item => console.log(item));
+  insertWallet: function (walletEntry) {
+    _db.collection('wallet').insertOne(walletEntry)
+      .catch(err => console.log(err));
   },
 
   getWallet: function () {

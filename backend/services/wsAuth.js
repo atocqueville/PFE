@@ -5,7 +5,7 @@ const {error} = require('../lib/logger');
 const authFormat = require('./wsFormat').authFormat;
 
 let apiKey = apiKeys.public;
-let walletUSD = 0, walletCrypto = 0, config;
+let walletUSD = 0, walletCrypto = 0, config, ws;
 
 function wsAuthConnection() {
   const authNonce = Date.now() * 1000;
@@ -21,7 +21,7 @@ function wsAuthConnection() {
     event: 'auth',
     filter: ['wallet', 'trading']
   };
-  let ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
+  ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
 
   ws.on('open', () => ws.send(JSON.stringify(payload)));
   ws.on('message', (message) => {

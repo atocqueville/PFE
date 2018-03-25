@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
-let config, channelID;
+let config, channelID, ws;
 
 function wsPublicConnection() {
   let timestampFormat = initTimestamp();
@@ -12,7 +12,7 @@ function wsPublicConnection() {
     channel: 'candles',
     key: candleKey
   };
-  let ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
+  ws = new WebSocket('wss://api.bitfinex.com/ws/2/');
 
   ws.on('open', () => {
     ws.send(JSON.stringify(payload));
@@ -45,6 +45,8 @@ function wsPublicConnection() {
 
 function initTimestamp() {
   switch (config.timestamp) {
+    case '1':
+      return '1m';
     case '5':
       return '5m';
     case '15':

@@ -37,6 +37,7 @@ module.exports = {
   updateWallet: function (usd, crypto) {
     walletUSD = usd;
     walletCrypto = crypto;
+    //TODO refacto cette merde
     if (walletCrypto !== 0) mongo.insertWallet(new WalletBalance(walletUSD))
   },
 

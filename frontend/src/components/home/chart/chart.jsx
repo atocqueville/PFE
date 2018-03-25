@@ -8,7 +8,7 @@ class Chart extends Component {
   constructor() {
     super();
     this.state = {
-      tabNumero: '2',
+      tabNumero: '1',
     };
 
     this.handleClick = this.handleClick.bind(this);
