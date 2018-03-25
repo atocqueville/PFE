@@ -23,6 +23,13 @@ class Trade {
   }
 }
 
+class WalletBalance {
+  constructor(balance) {
+    this.balance = balance;
+    this.date = new Date().toDateString()
+  }
+}
+
 // function walletSnapshot() {
 //
 // }
@@ -44,5 +51,6 @@ class Trade {
 
 module.exports = {
   Candle,
-  Trade
+  Trade,
+  WalletBalance
 };

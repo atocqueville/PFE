@@ -2,7 +2,7 @@ const mongo = require('../lib/mongodb');
 const wsAuth = require('./wsAuth');
 const clientTel = require('../lib/twilio');
 const {trades} = require('../lib/logger');
-const {Trade} = require('../model/model');
+const {Trade, WalletBalance} = require('../model/model');
 
 let lastCandle, config, tradeMongo, walletUSD, walletCrypto, previousTrade, position = false;
 
@@ -37,6 +37,7 @@ module.exports = {
   updateWallet: function (usd, crypto) {
     walletUSD = usd;
     walletCrypto = crypto;
+    if (walletCrypto !== 0) mongo.insertWallet(new WalletBalance(walletUSD))
   },
 
   setLastCandle: function (candle) {

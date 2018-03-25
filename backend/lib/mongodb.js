@@ -5,8 +5,8 @@ const dbName = 'botrsi';
 let _db, configCollection, historyCollection, walletCollection;
 let options = {
   keepAlive: 1,
-  socketTimeoutMS: 10000,
-  connectTimeoutMS: 10000
+  socketTimeoutMS: 5000,
+  connectTimeoutMS: 5000
 };
 let config = {
   currency: "BTC",
@@ -15,11 +15,6 @@ let config = {
   walletUsed: "90",
   minRSI: "30",
   maxRSI: "70"
-};
-
-let walletFaked = {
-  balance: "1000",
-  date: new Date().toLocaleDateString()
 };
 
 function initConfig(doc) {
@@ -63,16 +58,28 @@ module.exports = {
       .then(doc => config = doc);
   },
 
+  insertHistory: function (trade) {
+    historyCollection = _db.collection('history');
+    historyCollection.insertOne(trade)
+      .catch(err => console.log(err));
+  },
+
   getHistory: function () {
     return _db.collection('history').find({}).toArray();
+  },
+
+  getShortHistory: function () {
+    return _db.collection('history').find({}).limit(4).sort({$natural: -1}).toArray();
   },
 
   getLastTrade: function () {
     return _db.collection('history').find({}).limit(1).sort({$natural: -1}).toArray();
   },
 
-  getShortHistory: function () {
-    return _db.collection('history').find({}).limit(4).sort({$natural: -1}).toArray();
+  insertWallet: function () {
+    walletCollection = _db.collection('wallet');
+    walletCollection.insertOne(walletFaked)
+      .then(item => console.log(item));
   },
 
   getWallet: function () {
@@ -81,18 +88,6 @@ module.exports = {
 
   getLastWallet: function () {
     return _db.collection('wallet').find({}).limit(1).sort({$natural: -1}).toArray();
-  },
-
-  insertHistory: function (trade) {
-    historyCollection = _db.collection('history');
-    historyCollection.insertOne(trade)
-      .catch(err => console.log(err));
-  },
-
-  insertWallet: function () {
-    walletCollection = _db.collection('wallet');
-    walletCollection.insertOne(walletFaked)
-      .then(item => console.log(item));
   },
 
   getConfig: function () {
