@@ -71,6 +71,10 @@ module.exports = {
     return _db.collection('history').find({}).limit(1).sort({$natural: -1}).toArray();
   },
 
+  getShortHistory: function () {
+    return _db.collection('history').find({}).limit(4).sort({$natural: -1}).toArray();
+  },
+
   getWallet: function () {
     return _db.collection('wallet').find({}).toArray();
   },

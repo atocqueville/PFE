@@ -11,7 +11,7 @@ module.exports = function (app) {
     .get(controller.getConfig);
 
   app.route('/history')
-    .get(controller.getHistory);
+    .get(controller.getShortHistory);
 
   app.route('/config/status')
     .get(controller.stop)

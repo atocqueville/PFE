@@ -7,8 +7,8 @@ exports.getConfig = function (req, res) {
   res.set('status', services.getStatus()).json(mongo.getConfig());
 };
 
-exports.getHistory = function (req, res) {
-  mongo.getHistory()
+exports.getShortHistory = function (req, res) {
+  mongo.getShortHistory()
     .then(history => res.json(history))
     .catch(() => res.send('historyFetchFailed'));
 };
