@@ -1,20 +1,18 @@
 const cron = require('node-cron');
 const mongo = require('../lib/mongodb');
-const wsPublic = require('./wsPublic');
 const wsAuth = require('./wsAuth');
+const wsPublic = require('./wsPublic');
 const twilioConfigSetter = require('../lib/twilio').setConfig;
 const wsAuthConfigSetter = require('./wsAuth').setConfig;
 const wsPublicConfigSetter = require('./wsPublic').setConfig;
 const candleCalcSetter = require('./candleCalc').setConfig;
-const localWalletSetter = require('./walletAndTrades').setWalletAndLastTrade;
+const walletModule = require('./walletAndTrades');
 
-let config, derniereLocalCandle;
-let walletUSD, walletCrypto, orderAmount, position;
+let config;
 let status = false;
 
 let task = cron.schedule('*/5 * * * * *', function () {
-  // makeDecisions(derniereLocalCandle.DATA);
-  // console.log(derniereLocalCandle.DATA.CLOSE);
+  walletModule.makeDecisions();
 }, false);
 
 function startWebsockets() {
@@ -27,26 +25,6 @@ function stopWebsockets() {
   wsPublic.closeWebsocket();
   wsAuth.closeWebsocket();
   status = false;
-}
-
-function makeDecisions(lastCandle) {
-  if (!position) {
-    if (lastCandle.RSI < config.minRSI) {
-      orderAmount = ((walletUSD / lastCandle.CLOSE) * (Number(config.walletUsed) / 100)).toString();
-      wsAuth.newOrder(orderAmount);
-    }
-  } else if (position) {
-    if (lastCandle.RSI > config.maxRSI) {
-      orderAmount = (-1 * walletCrypto).toString();
-      wsAuth.newOrder(orderAmount);
-    }
-  }
-}
-
-function updateWallet(usd, crypto) {
-  walletUSD = usd;
-  walletCrypto = crypto;
-  position = !!walletCrypto;
 }
 
 async function updateConfig(newConfig) {
@@ -62,7 +40,7 @@ function initMongoFetch() {
   wsPublicConfigSetter(config);
   wsAuthConfigSetter(config);
   candleCalcSetter(config);
-  localWalletSetter();
+  walletModule.setWalletAndLastTrade();
 }
 
 function taskStopStart(bool) {
@@ -75,15 +53,9 @@ function getStatus() {
   return status;
 }
 
-function setDerniereCandle(candle) {
-  derniereLocalCandle = candle;
-}
-
 module.exports.startWebsockets = startWebsockets;
 module.exports.stopWebsockets = stopWebsockets;
-module.exports.updateWallet = updateWallet;
 module.exports.updateConfig = updateConfig;
-module.exports.initMongoFetch = initMongoFetch;
+module.exports.initMongo = initMongoFetch;
 module.exports.taskStopStart = taskStopStart;
 module.exports.getStatus = getStatus;
-module.exports.setDerniereCandle = setDerniereCandle;

@@ -1,14 +1,12 @@
 const WebSocket = require('ws');
+const walletModule = require('./walletAndTrades');
 const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
 const {error} = require('../lib/logger');
 const authFormat = require('./wsFormat').authFormat;
-const services = require('./index');
 
 let apiKey = apiKeys.public;
-let walletUSD, walletCrypto;
-let ws;
-let config;
+let walletUSD, walletCrypto, ws, config;
 
 function wsAuthConnection() {
   const authNonce = Date.now() * 1000;
@@ -42,10 +40,10 @@ function wsAuthConnection() {
         walletCrypto = msg[2][2];
       }
     } else if (msg[1] === 'te') {
-      if (msg[2][4] > 0) services.setBuy(msg[2][5]);
-      if (msg[2][4] < 0) services.setSell(msg[2][5]);
+      if (msg[2][4] > 0) walletModule.setBuy(msg[2][5]);
+      if (msg[2][4] < 0) walletModule.setSell(msg[2][5]);
     }
-    services.updateWallet(walletUSD, walletCrypto);
+    walletModule.updateWallet(walletUSD, walletCrypto);
   });
   ws.on('close', (res) => {
     if (res !== 1005) {

@@ -27,7 +27,7 @@ function wsPublicConnection() {
       channelID = msg.chanId;
     } else if (msg.length && msg.length > 1 && msg[1] !== 'hb') {
       if (msg[1][0].length > 1) {
-        candleCalc.initCandles(msg[1]);
+        candleCalc.initCandleStack(msg[1]);
       } else if (msg.length && msg.length > 1 && msg[0] === channelID) {
         candleCalc.manageCandle(msg[1]);
       }

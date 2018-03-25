@@ -1,7 +1,7 @@
 const mongo = require('./lib/mongodb');
 const express = require('express');
 const app = express();
-const startServer = require('./services/index').initMongoFetch;
+const startServer = require('./services/index').initMongo;
 const routes = require('./lib/routes');
 
 routes(app);
