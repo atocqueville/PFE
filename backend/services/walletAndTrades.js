@@ -2,28 +2,26 @@ const mongo = require('../lib/mongodb');
 const wsAuth = require('./wsAuth');
 const clientTel = require('../lib/twilio');
 const {trades} = require('../lib/logger');
-console.log(wsAuth);
-let derniereLocalCandle, config, buy, sell, walletUSD, walletCrypto, orderAmount, position = false;
+const {Trade} = require('../model/model');
+
+let derniereLocalCandle, config, tradeMongo, buy, sell, walletUSD, walletCrypto, orderAmount, position = false;
 
 module.exports = {
-  setWalletAndLastTrade: function () {
+  setLastTrade: function () {
     mongo.getLastTrade()
       .then(trade => {
-        if (trade[0].type === 'BUY') {
-          buy = trade[0].value;
-          position = true;
+        if (trade.length) {
+          if (trade[0].type === 'Buy') {
+            buy = trade[0].value;
+            position = true;
+          }
         }
       })
-      .catch(err => console.log(err));
-
-    // UTILE ??
-    mongo.getLastWallet()
-      .then(wallet => walletUSD = wallet[0].balance)
       .catch(err => console.log(err));
   },
 
   makeDecisions: function () {
-    console.log(`${derniereLocalCandle.DATA.CLOSE}, RSI: ${derniereLocalCandle.DATA.RSI}`);
+    console.log(derniereLocalCandle);
     // if (!position) {
     //   if (derniereLocalCandle.DATA.RSI < config.minRSI) {
     //     orderAmount = ((walletUSD / derniereLocalCandle.DATA.CLOSE) * (Number(config.walletUsed) / 100)).toString();
@@ -46,14 +44,18 @@ module.exports = {
     derniereLocalCandle = candle;
   },
 
-  setBuy: function (price) {
-    buy = price;
+  setBuy: function (trade) {
+    tradeMongo = new Trade('Buy', config.currency, trade[5], trade[4], trade[2]);
+    mongo.insertHistory(tradeMongo);
+    buy = trade[5];
     position = true;
     trades.info(`Achat au prix de : ${buy}$`);
   },
 
-  setSell: function (price) {
-    sell = price;
+  setSell: function (trade) {
+    tradeMongo = new Trade('Sell', config.currency, trade[5], trade[4], trade[2]);
+    mongo.insertHistory(tradeMongo);
+    sell = trade[5];
     position = false;
     trades.info(`Vente au prix de: ${sell}$ \n`);
     clientTel.sendSMS(buy, sell);

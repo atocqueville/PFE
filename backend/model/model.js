@@ -1,6 +1,6 @@
 'use strict';
 
-class candle {
+class Candle {
   constructor(mts, close, diff, avgGain, avgLoss, rsi, date) {
     this.MTS = mts || '';
     this.DATA = [];
@@ -13,25 +13,36 @@ class candle {
   }
 }
 
-function walletSnapshot() {
-
+class Trade {
+  constructor(type, crypto, value, amount, date) {
+    this.type = type;
+    this.crypto = crypto;
+    this.value = value;
+    this.amount = Math.abs(amount);
+    this.date = new Date(date).toLocaleString()
+  }
 }
 
-function walletUpdate() {
-
-}
-
-function tradeExecuted() {
-
-}
-
-function candleBitfinex(candle) {
-  this.chanId = candle[0];
-  this.MTS = candle[1];
-  this.OPEN = candle[2];
-  this.CLOSE = candle[3];
-}
+// function walletSnapshot() {
+//
+// }
+//
+// function walletUpdate() {
+//
+// }
+//
+// function tradeExecuted() {
+//
+// }
+//
+// function candleBitfinex(candle) {
+//   this.chanId = candle[0];
+//   this.MTS = candle[1];
+//   this.OPEN = candle[2];
+//   this.CLOSE = candle[3];
+// }
 
 module.exports = {
-  candle
+  Candle,
+  Trade
 };

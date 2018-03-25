@@ -1,4 +1,4 @@
-const Candle = require('../model/model').candle;
+const {Candle} = require('../model/model');
 const walletModule = require('./walletAndTrades');
 
 let derniereLocalCandle = new Candle();

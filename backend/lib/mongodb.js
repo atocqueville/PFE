@@ -22,21 +22,13 @@ let walletFaked = {
   date: new Date().toLocaleDateString()
 };
 
-let historyFaked = {
-  type: "SELL",
-  crypto: "BTC",
-  value: "9700",
-  amount: "0.9",
-  date: new Date().toLocaleString()
-};
-
 function initConfig(doc) {
   if (doc) {
     config = doc;
     return doc;
   } else {
     return configCollection.insertOne(config)
-      .then(item => { // TODO: RETRIEVE CONFIG AND SET VALUE
+      .then(item => {
         config = item.ops[0];
         return item;
       });
@@ -87,20 +79,16 @@ module.exports = {
     return _db.collection('wallet').find({}).limit(1).sort({$natural: -1}).toArray();
   },
 
-  insertHistory: function () {
+  insertHistory: function (trade) {
     historyCollection = _db.collection('history');
-    historyCollection.insertOne(historyFaked)
-      .then(item => console.log(item));
+    historyCollection.insertOne(trade)
+      .catch(err => console.log(err));
   },
 
   insertWallet: function () {
     walletCollection = _db.collection('wallet');
     walletCollection.insertOne(walletFaked)
       .then(item => console.log(item));
-  },
-
-  getDb: function () {
-    return _db;
   },
 
   getConfig: function () {

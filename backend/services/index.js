@@ -40,7 +40,7 @@ function initMongoFetch() {
   wsAuthConfigSetter(config);
   candleCalcSetter(config);
   walletModule.setConfig(config);
-  walletModule.setWalletAndLastTrade();
+  walletModule.setLastTrade();
 }
 
 function taskStopStart(bool) {
