@@ -21,18 +21,17 @@ module.exports = {
   },
 
   makeDecisions: function () {
-    console.log(derniereLocalCandle);
-    // if (!position) {
-    //   if (derniereLocalCandle.DATA.RSI < config.minRSI) {
-    //     orderAmount = ((walletUSD / derniereLocalCandle.DATA.CLOSE) * (Number(config.walletUsed) / 100)).toString();
-    //     wsAuth.newOrder(orderAmount);
-    //   }
-    // } else if (position) {
-    //   if (derniereLocalCandle.DATA.RSI > config.maxRSI) {
-    //     orderAmount = (-1 * walletCrypto).toString();
-    //     wsAuth.newOrder(orderAmount);
-    //   }
-    // }
+    if (!position) {
+      if (derniereLocalCandle.DATA.RSI < config.minRSI) {
+        orderAmount = ((walletUSD / derniereLocalCandle.DATA.CLOSE) * (Number(config.walletUsed) / 100)).toString();
+        wsAuth.newOrder(orderAmount);
+      }
+    } else if (position) {
+      if (derniereLocalCandle.DATA.RSI > config.maxRSI) {
+        orderAmount = (-1 * walletCrypto).toString();
+        wsAuth.newOrder(orderAmount);
+      }
+    }
   },
 
   updateWallet: function (usd, crypto) {
