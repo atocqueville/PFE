@@ -31,11 +31,13 @@ module.exports = {
 
     let candleTemplate;
     for (let i = 1; i < previousCandles.length; i++) {
-      candleTemplate = new Candle();
-      candleTemplate.MTS = previousCandles[i][0];
-      candleTemplate.DATA.CLOSE = previousCandles[i][2];
-      candleTemplate.DATA.DIFF = previousCandles[i][2] - previousCandles[i - 1][2];
-      candleTemplate.DATE = new Date(previousCandles[i][0]).toLocaleTimeString();
+      candleTemplate = new Candle(
+        previousCandles[i][0], // MTS
+        previousCandles[i][2], // CLOSE
+        previousCandles[i][2] - previousCandles[i - 1][2], // DIFF
+        '', '', '', // AVG GAIN/LOSS, RSI
+        new Date(previousCandles[i][0]).toLocaleTimeString() // DATE
+      );
       candlesJSON.push(candleTemplate);
     }
 

@@ -1,15 +1,15 @@
 'use strict';
 
 class candle {
-  constructor() {
-    this.MTS = '';
+  constructor(mts, close, diff, avgGain, avgLoss, rsi, date) {
+    this.MTS = mts || '';
     this.DATA = [];
-    this.DATA.CLOSE = '';
-    this.DATA.DIFF = '';
-    this.DATA.AVGGAIN = '';
-    this.DATA.AVGLOSS = '';
-    this.DATA.RSI = '';
-    this.DATE = '';
+    this.DATA.CLOSE = close || '';
+    this.DATA.DIFF = diff || '';
+    this.DATA.AVGGAIN = avgGain || '';
+    this.DATA.AVGLOSS = avgLoss || '';
+    this.DATA.RSI = rsi || '';
+    this.DATE = date || '';
   }
 }
 

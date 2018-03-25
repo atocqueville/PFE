@@ -49,7 +49,7 @@ module.exports = {
       .then(client => {
         _db = client.db(dbName);
         configCollection = _db.collection('config');
-        return configCollection.findOne();
+        return configCollection.findOne({});
       })
       .then(doc => {
         return initConfig(doc);

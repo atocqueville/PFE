@@ -8,8 +8,7 @@ const wsPublicConfigSetter = require('./wsPublic').setConfig;
 const candleCalcSetter = require('./candleCalc').setConfig;
 const walletModule = require('./walletAndTrades');
 
-let config;
-let status = false;
+let config, status = false;
 
 let task = cron.schedule('*/5 * * * * *', function () {
   walletModule.makeDecisions();
@@ -41,6 +40,7 @@ function initMongoFetch() {
   wsAuthConfigSetter(config);
   candleCalcSetter(config);
   walletModule.setWalletAndLastTrade();
+  startWebsockets();
 }
 
 function taskStopStart(bool) {

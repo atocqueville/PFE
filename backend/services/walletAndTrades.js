@@ -36,7 +36,9 @@ module.exports = {
   updateWallet: function (usd, crypto) {
     walletUSD = usd;
     walletCrypto = crypto;
-    // position = !!walletCrypto; /TODO: set position dans index
+    // position = !!walletCrypto; TODO: set position dans index ?
+    console.log('walletusd', walletUSD);
+    console.log('walletcrypto', walletCrypto);
   },
 
   setDerniereCandle: function (candle) {
