@@ -8,7 +8,7 @@ class Chart extends Component {
   constructor() {
     super();
     this.state = {
-      tabNumero: '1',
+      tabNumero: '2',
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -70,6 +70,10 @@ class Chart extends Component {
         symbol="BITFINEX:BTCUSD"
         theme="Dark"
         locale="fr"
+        save_image={false}
+        studies={[
+          "RSI@tv-basicstudies"
+        ]}
         autosize
       />
     );

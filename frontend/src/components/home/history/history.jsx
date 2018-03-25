@@ -3,7 +3,6 @@ import './history.css';
 
 function TradeList(props) {
   const history = props.history;
-  console.log(history);
   const listTrade = history.map(function (trade, i) {
       return (
         <p key={i}>{trade.type} {trade.amount} {trade.crypto} à {trade.value}$ le {trade.date}</p>
