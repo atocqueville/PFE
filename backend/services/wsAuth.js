@@ -6,7 +6,7 @@ const {error} = require('../lib/logger');
 const authFormat = require('./wsFormat').authFormat;
 
 let apiKey = apiKeys.public;
-let walletUSD, walletCrypto, ws, config;
+let walletUSD = 0, walletCrypto = 0, ws, config;
 
 function wsAuthConnection() {
   const authNonce = Date.now() * 1000;
@@ -33,7 +33,7 @@ function wsAuthConnection() {
         if (wallet[0] === 'exchange' && wallet[1] === config.currency) walletCrypto = wallet[2];
         if (wallet[0] === 'exchange' && wallet[1] === 'USD') walletUSD = wallet[2];
       });
-      walletModule.updateWallet(walletUSD || 0, walletCrypto || 0);
+      walletModule.updateWallet(walletUSD, walletCrypto);
     } else if (msg[1] === 'wu') {
       if (msg[2][0] === 'exchange' && msg[2][1] === 'USD') {
         walletUSD = msg[2][2];

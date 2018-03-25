@@ -30,15 +30,13 @@ module.exports = {
     //     wsAuth.newOrder(orderAmount);
     //   }
     // }
-    console.log(derniereLocalCandle);
+    // console.log(derniereLocalCandle);
   },
 
   updateWallet: function (usd, crypto) {
     walletUSD = usd;
     walletCrypto = crypto;
     // position = !!walletCrypto; TODO: set position dans index ?
-    console.log('walletusd', walletUSD);
-    console.log('walletcrypto', walletCrypto);
   },
 
   setDerniereCandle: function (candle) {
