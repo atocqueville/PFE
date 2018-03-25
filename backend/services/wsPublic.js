@@ -1,6 +1,4 @@
 const WebSocket = require('ws');
-const candleCalc = require('./candleCalc');
-const services = require('./index');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
@@ -80,3 +78,6 @@ module.exports = {
   closeWebsocket,
   setConfig
 };
+
+const services = require('./index');
+const candleCalc = require('./candleCalc');

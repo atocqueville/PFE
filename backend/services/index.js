@@ -39,8 +39,8 @@ function initMongoFetch() {
   wsPublicConfigSetter(config);
   wsAuthConfigSetter(config);
   candleCalcSetter(config);
+  walletModule.setConfig(config);
   walletModule.setWalletAndLastTrade();
-  startWebsockets();
 }
 
 function taskStopStart(bool) {

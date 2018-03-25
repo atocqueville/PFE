@@ -1,5 +1,4 @@
 const WebSocket = require('ws');
-const walletModule = require('./walletAndTrades');
 const Crypto = require('crypto-js');
 const apiKeys = require('../config/apikeys');
 const {error} = require('../lib/logger');
@@ -85,3 +84,5 @@ module.exports = {
   newOrder,
   setConfig
 };
+
+const walletModule = require('./walletAndTrades');
