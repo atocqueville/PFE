@@ -2,7 +2,6 @@ const cron = require('node-cron');
 const mongo = require('../lib/mongodb');
 const wsAuth = require('./wsAuth');
 const wsPublic = require('./wsPublic');
-const twilioConfigSetter = require('../lib/twilio').setConfig;
 const wsAuthConfigSetter = require('./wsAuth').setConfig;
 const wsPublicConfigSetter = require('./wsPublic').setConfig;
 const candleCalcConfigSetter = require('./candleCalc').setConfig;
@@ -35,7 +34,6 @@ async function updateConfig(newConfig) {
 
 function initMongoFetch() {
   config = mongo.getConfig();
-  twilioConfigSetter(config);
   wsPublicConfigSetter(config);
   wsAuthConfigSetter(config);
   candleCalcConfigSetter(config);

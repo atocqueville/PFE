@@ -41,11 +41,8 @@ function wsAuthConnection() {
       }
       walletModule.updateWallet(walletUSD, walletCrypto);
     } else if (msg[1] === 'te') {
-      console.log(msg);
       if (msg[2][4] > 0) walletModule.setBuy(msg[2]);
       if (msg[2][4] < 0) walletModule.setSell(msg[2]);
-    } else if (msg[1] === 'tu') {
-      console.log(msg);
     }
   });
   ws.on('close', (res) => {

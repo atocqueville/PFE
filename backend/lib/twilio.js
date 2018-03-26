@@ -3,16 +3,15 @@
 const config = require('../config/twilio');
 const twilio = require('twilio');
 
-let currency;
 let client = new twilio(config.accountSid, config.authToken);
 
 function sendSMS(buyTrade, sellTrade) {
-  let benef = (sellTrade[2] * sellTrade[3] * 0.999) - (buyTrade[2] * buyTrade[3] * 0.999);
-  let message = `Cyrpto ${currency}
-    Achat au prix de: ${buyTrade[2]}$
-    Vente au prix de: ${sellTrade[2]}$
-    Variation après fees: ${((((sellTrade[2] / buyTrade[2]) - 1) * 100) - 0.4).toFixed(2)}%
-    Benefice net: ${benef}`;
+  let benef = (sellTrade.value * sellTrade.amount * 0.999) - (buyTrade.value * buyTrade.amount * 0.999);
+  let message = `Crypto ${sellTrade.crypto}
+  Achat au prix de: ${buyTrade.value}$
+  Vente au prix de: ${sellTrade.value}$
+  Variation après fees: ${((((sellTrade.value / buyTrade.value) - 1) * 100) - 0.4).toFixed(2)}%
+  Benefice net: ${benef.toFixed(2)}$`;
   client.messages.create({
     body: message,
     to: config.to,
@@ -20,11 +19,6 @@ function sendSMS(buyTrade, sellTrade) {
   });
 }
 
-function setConfig(configMongo) {
-  currency = configMongo.currency;
-}
-
 module.exports = {
-  sendSMS,
-  setConfig
+  sendSMS
 };

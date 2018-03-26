@@ -49,6 +49,7 @@ module.exports = {
     tradeMongo = new Trade('Buy', config.currency, trade[5], trade[4], trade[2]);
     mongo.insertHistory(tradeMongo);
     previousTrade = tradeMongo;
+    console.log(previousTrade);
     position = true;
     trades.info(`Achat au prix de : ${trade[5]}$`);
   },
@@ -57,6 +58,7 @@ module.exports = {
     tradeMongo = new Trade('Sell', config.currency, trade[5], trade[4], trade[2]);
     mongo.insertHistory(tradeMongo);
     position = false;
+    console.log(tradeMongo);
     trades.info(`Vente au prix de: ${trade[5]}$ \n`);
     clientTel.sendSMS(previousTrade, tradeMongo);
   },
