@@ -5,7 +5,6 @@ const publicFormat = require('./wsFormat').publicFormat;
 let channelID, ws;
 
 function wsPublicConnection(configMongo) {
-  console.log(services);
   let config = configMongo;
   let candleKey = `trade:${initTimestamp(config)}:t${config.currency}USD`;
   const payload = {

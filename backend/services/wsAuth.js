@@ -8,7 +8,6 @@ let apiKey = apiKeys.public;
 let walletUSD = 0, walletCrypto = 0, config, ws;
 
 function wsAuthConnection(configMongo) {
-  console.log(walletModule);
   config = configMongo;
   const authNonce = Date.now() * 1000;
   const authPayload = 'AUTH' + authNonce;
