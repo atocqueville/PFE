@@ -1,11 +1,5 @@
 const cron = require('node-cron');
 const mongo = require('../lib/mongodb');
-const wsAuth = require('./wsAuth');
-const wsPublic = require('./wsPublic');
-const wsAuthConfigSetter = require('./wsAuth').setConfig;
-const wsPublicConfigSetter = require('./wsPublic').setConfig;
-const candleCalcConfigSetter = require('./candleCalc').setConfig;
-const walletModule = require('./walletAndTrades');
 
 let config, status = false;
 
@@ -14,8 +8,8 @@ let task = cron.schedule('*/5 * * * * *', function () {
 }, false);
 
 function startWebsockets() {
-  wsPublic.connection();
-  wsAuth.connection();
+  wsPublic.connection(config);
+  wsAuth.connection(config);
   status = true;
 }
 
@@ -27,16 +21,13 @@ function stopWebsockets() {
 
 async function updateConfig(newConfig) {
   await mongo.updateConfig(newConfig);
-  initMongoFetch();
+  initModules();
   startWebsockets();
   return status;
 }
 
-function initMongoFetch() {
+function initModules() {
   config = mongo.getConfig();
-  wsPublicConfigSetter(config);
-  wsAuthConfigSetter(config);
-  candleCalcConfigSetter(config);
   walletModule.setConfig(config);
   walletModule.setPreviousData();
 }
@@ -51,9 +42,21 @@ function getStatus() {
   return status;
 }
 
-module.exports.startWebsockets = startWebsockets;
-module.exports.stopWebsockets = stopWebsockets;
-module.exports.updateConfig = updateConfig;
-module.exports.initMongo = initMongoFetch;
-module.exports.taskStopStart = taskStopStart;
-module.exports.getStatus = getStatus;
+// module.exports.startWebsockets = startWebsockets;
+// module.exports.stopWebsockets = stopWebsockets;
+// module.exports.updateConfig = updateConfig;
+// module.exports.initMongo = initMongo;
+// module.exports.taskStopStart = taskStopStart;
+// module.exports.getStatus = getStatus;
+
+module.exports = {
+  stopWebsockets,
+  updateConfig,
+  initModules,
+  taskStopStart,
+  getStatus
+};
+
+const wsPublic = require('./wsPublic');
+const wsAuth = require('./wsAuth');
+const walletModule = require('./walletAndTrades');

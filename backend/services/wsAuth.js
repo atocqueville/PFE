@@ -7,7 +7,9 @@ const authFormat = require('./wsFormat').authFormat;
 let apiKey = apiKeys.public;
 let walletUSD = 0, walletCrypto = 0, config, ws;
 
-function wsAuthConnection() {
+function wsAuthConnection(configMongo) {
+  console.log(walletModule);
+  config = configMongo;
   const authNonce = Date.now() * 1000;
   const authPayload = 'AUTH' + authNonce;
   const authSig = Crypto
@@ -74,15 +76,10 @@ function closeWebsocket() {
   ws.close();
 }
 
-function setConfig(configMongo) {
-  config = configMongo;
-}
-
 module.exports = {
   connection: wsAuthConnection,
   closeWebsocket,
-  newOrder,
-  setConfig
+  newOrder
 };
 
 const walletModule = require('./walletAndTrades');

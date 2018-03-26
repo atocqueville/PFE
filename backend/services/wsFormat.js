@@ -1,5 +1,4 @@
 'use strict';
-
 function publicFormat(message) {
   if (message[1] === 'candle') {
 

@@ -1,5 +1,4 @@
 const mongo = require('../lib/mongodb');
-const wsAuth = require('./wsAuth');
 const clientTel = require('../lib/twilio');
 const {trades} = require('../lib/logger');
 const {Trade, WalletBalance} = require('../model/model');
@@ -67,3 +66,5 @@ module.exports = {
     config = configMongo;
   }
 };
+
+const wsAuth = require('./wsAuth');

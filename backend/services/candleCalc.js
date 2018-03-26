@@ -25,7 +25,8 @@ function updateCandle(lastCandle) {
 }
 
 module.exports = {
-  initCandleStack: function (previousCandles) {
+  initCandleStack: function (previousCandles, configMongo) {
+    config = configMongo;
     previousCandles.reverse();
     let candlesJSON = [];
 
@@ -96,9 +97,5 @@ module.exports = {
     else if (lastCandle[0] === derniereLocalCandle.MTS) {
       updateCandle(lastCandle);
     }
-  },
-
-  setConfig: function (configMongo) {
-    config = configMongo;
   }
 };

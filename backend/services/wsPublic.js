@@ -2,11 +2,12 @@ const WebSocket = require('ws');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
 
-let config, channelID, ws;
+let channelID, ws;
 
-function wsPublicConnection() {
-  let timestampFormat = initTimestamp();
-  let candleKey = 'trade:' + timestampFormat + ':t' + config.currency + 'USD';
+function wsPublicConnection(configMongo) {
+  console.log(services);
+  let config = configMongo;
+  let candleKey = `trade:${initTimestamp(config)}:t${config.currency}USD`;
   const payload = {
     event: 'subscribe',
     channel: 'candles',
@@ -25,7 +26,7 @@ function wsPublicConnection() {
       channelID = msg.chanId;
     } else if (msg.length && msg.length > 1 && msg[1] !== 'hb') {
       if (msg[1][0].length > 1) {
-        candleCalc.initCandleStack(msg[1]);
+        candleCalc.initCandleStack(msg[1], config);
       } else if (msg.length && msg.length > 1 && msg[0] === channelID) {
         candleCalc.manageCandle(msg[1]);
       }
@@ -43,7 +44,7 @@ function wsPublicConnection() {
   });
 }
 
-function initTimestamp() {
+function initTimestamp(config) {
   switch (config.timestamp) {
     case '1':
       return '1m';
@@ -66,14 +67,9 @@ function closeWebsocket() {
   ws.close();
 }
 
-function setConfig(configMongo) {
-  config = configMongo;
-}
-
 module.exports = {
   connection: wsPublicConnection,
-  closeWebsocket,
-  setConfig
+  closeWebsocket
 };
 
 const services = require('./index');
