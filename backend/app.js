@@ -1,8 +1,8 @@
 const mongo = require('./lib/mongodb');
 const express = require('express');
 const app = express();
-const services = require('./services/index');
 const routes = require('./lib/routes');
+const services = require('./services/index');
 
 routes(app);
 

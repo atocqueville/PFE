@@ -2,6 +2,7 @@ const mongo = require('../lib/mongodb');
 const clientTel = require('../lib/twilio');
 const {trades} = require('../lib/logger');
 const {Trade, WalletBalance} = require('../model/model');
+const wsAuth = require('./wsAuth');
 
 let lastCandle, config, tradeMongo, walletUSD, walletCrypto, previousTrade, position = false;
 
@@ -67,4 +68,3 @@ module.exports = {
   }
 };
 
-const wsAuth = require('./wsAuth');

@@ -1,5 +1,7 @@
 const cron = require('node-cron');
 const mongo = require('../lib/mongodb');
+const wsAuth = require('./wsAuth');
+const walletModule = require('./walletAndTrades');
 
 let config, status = false;
 
@@ -58,5 +60,3 @@ module.exports = {
 };
 
 const wsPublic = require('./wsPublic');
-const wsAuth = require('./wsAuth');
-const walletModule = require('./walletAndTrades');

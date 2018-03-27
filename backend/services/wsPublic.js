@@ -1,6 +1,8 @@
 const WebSocket = require('ws');
 const {error} = require('../lib/logger');
 const publicFormat = require('./wsFormat').publicFormat;
+const services = require('./index');
+const candleCalc = require('./candleCalc');
 
 let channelID, ws;
 
@@ -70,6 +72,3 @@ module.exports = {
   connection: wsPublicConnection,
   closeWebsocket
 };
-
-const services = require('./index');
-const candleCalc = require('./candleCalc');
