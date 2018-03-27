@@ -22,4 +22,6 @@ module.exports = function (app) {
 
   app.route('/stats')
     .get(controller.listAllTrades);
+
+  return app;
 };
