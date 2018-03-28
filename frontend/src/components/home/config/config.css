@@ -14,3 +14,35 @@
 .input-label {
     padding-left: 5px;
 }
+
+.input-label-sliders {
+    position: relative;
+    left: 45%;
+}
+
+.col .ant-input-number {
+    width: 54px;
+}
+
+.slider-container {
+    display: flex;
+    margin-top: -12px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+.number-input .ant-input-number {
+    width: 40px;
+}
+
+.rsi-slider-input {
+    width: 90%;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.wallet-slider-input {
+    width: 90%;
+    margin-right: 10px;
+}
