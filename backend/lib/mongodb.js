@@ -2,7 +2,7 @@ const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb://localhost:27017/botrsi';
 const dbName = 'botrsi';
-let _db, configCollection;
+let configCollection, historyCollection, walletCollection;
 let options = {
   keepAlive: 1,
   socketTimeoutMS: 5000,
@@ -30,12 +30,17 @@ function initConfig(doc) {
   }
 }
 
+function initCollections(db) {
+  configCollection = db.collection('config');
+  historyCollection = db.collection('history');
+  walletCollection = db.collection('wallet');
+}
+
 module.exports = {
   initMongo: function () {
     return MongoClient.connect(url, options)
       .then(client => {
-        _db = client.db(dbName);
-        configCollection = _db.collection('config');
+        initCollections(client.db(dbName));
         return configCollection.findOne({});
       })
       .then(doc => {
@@ -59,29 +64,29 @@ module.exports = {
   },
 
   insertHistory: function (trade) {
-    _db.collection('history').insertOne(trade)
+    historyCollection.insertOne(trade)
       .catch(err => console.log(err));
   },
 
   getHistory: function () {
-    return _db.collection('history').find({}).toArray();
+    return historyCollection.find({}).toArray();
   },
 
   getShortHistory: function () {
-    return _db.collection('history').find({}).limit(4).sort({$natural: -1}).toArray();
+    return historyCollection.find({}).limit(4).sort({$natural: -1}).toArray();
   },
 
   getLastTrade: function () {
-    return _db.collection('history').find({}).limit(1).sort({$natural: -1}).toArray();
+    return historyCollection.find({}).limit(1).sort({$natural: -1}).toArray();
   },
 
-  insertWallet: function (walletEntry) {
-    _db.collection('wallet').insertOne(walletEntry)
+  insertWallet: function (wallet) {
+    walletCollection.insertOne(wallet)
       .catch(err => console.log(err));
   },
 
   getWallet: function () {
-    return _db.collection('wallet').find({}).toArray();
+    return walletCollection.find({}).toArray();
   },
 
   getConfig: function () {
