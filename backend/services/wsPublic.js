@@ -1,8 +1,7 @@
 const WebSocket = require('ws');
 const {error} = require('../lib/logger');
-const publicFormat = require('./wsFormat').publicFormat;
-const services = require('./index');
-const candleCalc = require('./candleCalc');
+const {taskStopStart} = require('./index');
+const {initCandleStack, manageCandle} = require('./candleCalc');
 
 let channelID, ws;
 
@@ -18,18 +17,18 @@ function wsPublicConnection(configMongo) {
 
   ws.on('open', () => {
     ws.send(JSON.stringify(payload));
-    services.taskStopStart(true);
+    taskStopStart(true);
   });
   ws.on('message', (message) => {
-    let msg = publicFormat(JSON.parse(message));
+    let msg = JSON.parse(message);
     // console.log(msg);
     if (msg.event && msg.event === 'subscribed') {
       channelID = msg.chanId;
     } else if (msg.length && msg.length > 1 && msg[1] !== 'hb') {
       if (msg[1][0].length > 1) {
-        candleCalc.initCandleStack(msg[1], config);
+        initCandleStack(msg[1], config);
       } else if (msg.length && msg.length > 1 && msg[0] === channelID) {
-        candleCalc.manageCandle(msg[1]);
+        manageCandle(msg[1]);
       }
     }
   });
@@ -37,7 +36,7 @@ function wsPublicConnection(configMongo) {
     if (res !== 1005) {
       setTimeout(() => wsPublicConnection(), 1000);
     }
-    services.taskStopStart(false);
+    taskStopStart(false);
     error.info('[CLOSED] - ' + res);
   });
   ws.on('error', (err) => {

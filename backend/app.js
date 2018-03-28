@@ -1,9 +1,9 @@
-const mongo = require('./lib/mongodb');
 const express = require('express');
 const app = require('./lib/routes')(express());
-const services = require('./services/index');
+const {initMongo} = require('./lib/mongodb');
+const {initModules} = require('./services/index');
 
 app.listen(3001, async () => {
-  await mongo.init();
-  services.initModules();
+  await initMongo();
+  initModules();
 });

@@ -1,14 +1,14 @@
-const mongo = require('../lib/mongodb');
-const clientTel = require('../lib/twilio');
+const {getLastTrade, insertHistory, insertWallet} = require('../lib/mongodb');
+const {sendSMS} = require('../lib/twilio');
 const {trades} = require('../lib/logger');
 const {Trade, WalletBalance} = require('../model/model');
-const wsAuth = require('./wsAuth');
+const {newOrder} = require('./wsAuth');
 
 let lastCandle, config, tradeMongo, walletUSD, walletCrypto, previousTrade, position = false;
 
 module.exports = {
   setPreviousData: function () {
-    mongo.getLastTrade()
+    getLastTrade()
       .then(trade => {
         if (trade.length) {
           if (trade[0].type === 'Buy') {
@@ -24,12 +24,12 @@ module.exports = {
     if (!position) {
       if (lastCandle.DATA.RSI < config.minRSI) {
         let orderAmount = ((walletUSD / lastCandle.DATA.CLOSE) * (Number(config.walletUsed) / 100)).toString();
-        wsAuth.newOrder(orderAmount);
+        newOrder(orderAmount);
       }
     } else if (position) {
       if (lastCandle.DATA.RSI > config.maxRSI) {
         let orderAmount = (-1 * walletCrypto).toString();
-        wsAuth.newOrder(orderAmount);
+        newOrder(orderAmount);
       }
     }
   },
@@ -38,7 +38,7 @@ module.exports = {
     walletUSD = usd;
     walletCrypto = crypto;
     //TODO refacto cette merde
-    if (walletCrypto !== 0) mongo.insertWallet(new WalletBalance(walletUSD))
+    if (walletCrypto !== 0) insertWallet(new WalletBalance(walletUSD))
   },
 
   setLastCandle: function (candle) {
@@ -47,7 +47,7 @@ module.exports = {
 
   setBuy: function (trade) {
     tradeMongo = new Trade('Buy', config.currency, trade[5], trade[4], trade[2]);
-    mongo.insertHistory(tradeMongo);
+    insertHistory(tradeMongo);
     previousTrade = tradeMongo;
     console.log(previousTrade);
     position = true;
@@ -56,11 +56,11 @@ module.exports = {
 
   setSell: function (trade) {
     tradeMongo = new Trade('Sell', config.currency, trade[5], trade[4], trade[2]);
-    mongo.insertHistory(tradeMongo);
+    insertHistory(tradeMongo);
     position = false;
     console.log(tradeMongo);
     trades.info(`Vente au prix de: ${trade[5]}$ \n`);
-    clientTel.sendSMS(previousTrade, tradeMongo);
+    sendSMS(previousTrade, tradeMongo);
   },
 
   setConfig: function (configMongo) {

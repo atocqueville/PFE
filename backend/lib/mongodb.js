@@ -31,7 +31,7 @@ function initConfig(doc) {
 }
 
 module.exports = {
-  init: function () {
+  initMongo: function () {
     return MongoClient.connect(url, options)
       .then(client => {
         _db = client.db(dbName);
@@ -44,7 +44,7 @@ module.exports = {
       .catch(err => console.log(err));
   },
 
-  updateConfig: function (newConfig) {
+  updateConfigMongo: function (newConfig) {
     return configCollection.updateOne({}, {
       $set: {
         currency: newConfig.currency,
@@ -82,10 +82,6 @@ module.exports = {
 
   getWallet: function () {
     return _db.collection('wallet').find({}).toArray();
-  },
-
-  getLastWallet: function () {
-    return _db.collection('wallet').find({}).limit(1).sort({$natural: -1}).toArray();
   },
 
   getConfig: function () {

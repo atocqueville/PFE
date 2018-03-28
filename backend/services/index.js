@@ -1,12 +1,12 @@
 const cron = require('node-cron');
-const mongo = require('../lib/mongodb');
+const {updateConfigMongo, getConfig} = require('../lib/mongodb');
 const wsAuth = require('./wsAuth');
-const walletModule = require('./walletAndTrades');
+const {makeDecisions, setPreviousData, setConfig} = require('./walletAndTrades');
 
 let config, status = false;
 
 let task = cron.schedule('*/5 * * * * *', function () {
-  walletModule.makeDecisions();
+  makeDecisions();
 }, false);
 
 function startWebsockets() {
@@ -22,16 +22,16 @@ function stopWebsockets() {
 }
 
 async function updateConfig(newConfig) {
-  await mongo.updateConfig(newConfig);
+  await updateConfigMongo(newConfig);
   initModules();
   startWebsockets();
   return status;
 }
 
 function initModules() {
-  config = mongo.getConfig();
-  walletModule.setConfig(config);
-  walletModule.setPreviousData();
+  config = getConfig();
+  setConfig(config);
+  setPreviousData();
 }
 
 function taskStopStart(bool) {
@@ -43,13 +43,6 @@ function taskStopStart(bool) {
 function getStatus() {
   return status;
 }
-
-// module.exports.startWebsockets = startWebsockets;
-// module.exports.stopWebsockets = stopWebsockets;
-// module.exports.updateConfig = updateConfig;
-// module.exports.initMongo = initMongo;
-// module.exports.taskStopStart = taskStopStart;
-// module.exports.getStatus = getStatus;
 
 module.exports = {
   stopWebsockets,

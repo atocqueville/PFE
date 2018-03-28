@@ -1,5 +1,5 @@
 const {Candle} = require('../model/model');
-const walletModule = require('./walletAndTrades');
+const {setLastCandle} = require('./walletAndTrades');
 
 let derniereLocalCandle = new Candle();
 let avantDerniereLocalCandle = new Candle();
@@ -21,7 +21,7 @@ function updateCandle(lastCandle) {
   }
   derniereLocalCandle.DATA.RSI = 100 - (100 / (1 + (derniereLocalCandle.DATA.AVGGAIN / derniereLocalCandle.DATA.AVGLOSS)));
   derniereLocalCandle.DATE = new Date(derniereLocalCandle.MTS).toLocaleTimeString();
-  walletModule.setLastCandle(derniereLocalCandle);
+  setLastCandle(derniereLocalCandle);
 }
 
 module.exports = {
@@ -79,7 +79,7 @@ module.exports = {
       derniereLocalCandle.DATA = candle;
       derniereLocalCandle.DATE = candlesJSON[i].DATE;
     }
-    walletModule.setLastCandle(derniereLocalCandle);
+    setLastCandle(derniereLocalCandle);
     return candlesJSON;
   },
 
