@@ -24,11 +24,13 @@ module.exports = {
     if (!position) {
       if (lastCandle.DATA.RSI < config.minRSI) {
         let orderAmount = ((walletUSD / lastCandle.DATA.CLOSE) * (Number(config.walletUsed) / 100)).toString();
+        console.log('buy');
         newOrder(orderAmount);
       }
     } else if (position) {
       if (lastCandle.DATA.RSI > config.maxRSI) {
         let orderAmount = (-1 * walletCrypto).toString();
+        console.log('sell');
         newOrder(orderAmount);
       }
     }
@@ -37,8 +39,11 @@ module.exports = {
   updateWallet: function (usd, crypto) {
     walletUSD = usd;
     walletCrypto = crypto;
-    //TODO refacto cette merde
-    if (walletCrypto !== 0) insertWallet(new WalletBalance(walletUSD))
+    if (walletCrypto === 0) {
+      setTimeout(function () {
+        insertWallet(new WalletBalance(walletUSD))
+      }, 3000);
+    }
   },
 
   setLastCandle: function (candle) {
@@ -49,7 +54,6 @@ module.exports = {
     tradeMongo = new Trade('Buy', config.currency, trade[5], trade[4], trade[2]);
     insertHistory(tradeMongo);
     previousTrade = tradeMongo;
-    console.log(previousTrade);
     position = true;
     trades.info(`Achat au prix de : ${trade[5]}$`);
   },
@@ -58,7 +62,6 @@ module.exports = {
     tradeMongo = new Trade('Sell', config.currency, trade[5], trade[4], trade[2]);
     insertHistory(tradeMongo);
     position = false;
-    console.log(tradeMongo);
     trades.info(`Vente au prix de: ${trade[5]}$ \n`);
     sendSMS(previousTrade, tradeMongo);
   },

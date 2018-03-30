@@ -81,6 +81,9 @@ class Config extends Component {
                 <label className="input-label">RSI period</label>
                 <Select disabled={this.state.status} size="large"
                         value={this.state.config.RSIperiod} onChange={e => this.handleChange(e, 'RSIperiod')}>
+                  <Select.Option value="4">4</Select.Option>
+                  <Select.Option value="5">5</Select.Option>
+                  <Select.Option value="6">6</Select.Option>
                   <Select.Option value="7">7</Select.Option>
                   <Select.Option value="8">8</Select.Option>
                   <Select.Option value="9">9</Select.Option>
